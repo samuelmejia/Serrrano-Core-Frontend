@@ -1,0 +1,83 @@
+<script setup lang="ts">
+const isSidebarOpen = ref(false);
+const sidebar = ref<HTMLElement | null>(null);
+
+const toggleSidebar = () => {
+	isSidebarOpen.value = !isSidebarOpen.value;
+};
+
+const handleClickOutside = (event: Event) => {
+	if (!sidebar.value) return;
+	if (!event.target) return;
+
+	if (sidebar.value && !sidebar.value.contains(<Node>event.target)) {
+		isSidebarOpen.value = false;
+	}
+};
+
+const handleKeyup = (event: KeyboardEvent) => {
+	if (event.key === "Escape") {
+		isSidebarOpen.value = false;
+	}
+};
+
+onMounted(() => {
+	document.addEventListener("click", handleClickOutside);
+	document.addEventListener("keyup", handleKeyup);
+});
+
+onUnmounted(() => {
+	document.removeEventListener("click", handleClickOutside);
+	document.removeEventListener("keyup", handleKeyup);
+});
+</script>
+
+<template>
+	<Head>
+		<link
+			rel="stylesheet"
+			href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.9.0/css/all.min.css"
+			integrity="sha512-q3eWabyZPc1XTCmF+8/LuE1ozpg5xxn7iO89yfSOd5/oKvyqLngoNGsx8jq92Y8eXJ/IRxQbEC+FGSYxtk2oiw=="
+			crossorigin="anonymous"
+			referrerpolicy="no-referrer"
+		/>
+	</Head>
+
+	<div class="flex h-screen bg-gray-100">
+		<!-- Sidebar -->
+		<div
+			style="width: 16rem"
+			:class="[
+				'fixed flex flex-col inset-y-0 left-0 transform md:static md:translate-x-0 transition-transform duration-300 ease-in-out bg-gray-200 text-orange-600',
+				{ '-translate-x-full': !isSidebarOpen },
+			]"
+			ref="sidebar"
+		>
+			<SideBar />
+		</div>
+
+		<!-- Main content -->
+		<div class="flex flex-col flex-1 overflow-y-auto" @click="handleClickOutside">
+			<div class="flex items-center justify-between h-16 bg-white border-b border-gray-100">
+				<div class="flex items-center px-4">
+					<!-- Botón para mostrar/ocultar el sidebar en tamaño móvil -->
+					<button class="text-gray-500 focus:outline-none focus:text-gray-700 md:hidden" @click.stop="toggleSidebar">Options</button>
+				</div>
+				<div style="flex: 1">
+					<b style="font-size: 1.1rem">TITULO DE LA PAGINA</b><br />
+					<span style="font-size: 0.8rem">Explicacion de las acciones</span>
+				</div>
+				<div class="flex items-center pr-4" style="column-gap: 5px">
+					<span>Nombre de Persona</span>
+					<img src="/img/serrano-icon.png" style="height: 40px" />
+					<!--
+					<button class="flex items-center text-gray-500 hover:text-gray-700 focus:outline-none focus:text-gray-700">Perfil</button>
+					-->
+				</div>
+			</div>
+			<div class="p-4">
+				<slot />
+			</div>
+		</div>
+	</div>
+</template>
