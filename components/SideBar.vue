@@ -4,8 +4,6 @@ import { ref } from "vue";
 function cerrarSesion() {
 	alert("Cerrar sesion");
 }
-
-const mostrarModuloX = ref(false);
 </script>
 
 <template>
@@ -14,7 +12,7 @@ const mostrarModuloX = ref(false);
 	</div>
 	<div style="height: 80%; font-size: 0.9rem" class="flex flex-col flex-1 overflow-y-auto">
 		<nav class="flex-1 px-2 py-4">
-			<a href="#" class="flex items-center px-4 py-1 mt-1 bg-[#4441] hover:bg-gray-200 hover-text-orange-600"> <i class="mr-2 fas fa-chart-line"></i> Dashboard</a>
+			<a href="/dashboard" class="flex items-center px-4 py-1 mt-1 bg-[#4441] hover:bg-gray-200 hover-text-orange-600"> <i class="mr-2 fas fa-chart-line"></i> Dashboard</a>
 			<div class="flex justify-center py-1">
 				<span style="border: 1px solid #ea580c; display: block; width: 80%"></span>
 			</div>
@@ -28,7 +26,7 @@ const mostrarModuloX = ref(false);
 								<i class="group-open:rotate-180 fas fa-chevron-up"></i>
 							</summary>
 							<div class="accordion-content ml-6" style="border-left: 1px solid">
-								<a href="#" class="flex items-center px-4 py-1 mt-1 hover:bg-gray-200 hover-text-orange-600">Opcion 1.1</a>
+								<a href="/compras/levantamiento" class="flex items-center px-4 py-1 mt-1 hover:bg-gray-200 hover-text-orange-600">Gestionar Levantamiento</a>
 								<a href="#" class="flex items-center px-4 py-1 mt-1 hover:bg-gray-200 hover-text-orange-600">Opcion 1.2</a>
 							</div>
 						</details>

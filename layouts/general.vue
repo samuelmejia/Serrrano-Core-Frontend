@@ -1,4 +1,6 @@
 <script setup lang="ts">
+const route = useRoute();
+
 const isSidebarOpen = ref(false);
 const sidebar = ref<HTMLElement | null>(null);
 
@@ -47,7 +49,10 @@ onUnmounted(() => {
 		<!-- Sidebar -->
 		<div
 			style="width: 16rem; background-color: #374151"
-			:class="['fixed flex flex-col inset-y-0 left-0 transform md:static md:translate-x-0 transition-transform duration-300 ease-in-out text-white', { '-translate-x-full': !isSidebarOpen }]"
+			:class="[
+				'clase-index fixed flex flex-col inset-y-0 left-0 transform lg:static lg:translate-x-0 transition-transform duration-300 ease-in-out text-white',
+				{ '-translate-x-full': !isSidebarOpen },
+			]"
 			ref="sidebar"
 		>
 			<SideBar />
@@ -58,11 +63,12 @@ onUnmounted(() => {
 			<div class="flex items-center justify-between h-16 bg-white border-b border-gray-100 shadow-lg">
 				<div class="flex items-center px-4">
 					<!-- Botón para mostrar/ocultar el sidebar en tamaño móvil -->
-					<button class="text-gray-500 focus:outline-none focus:text-gray-700 md:hidden" @click.stop="toggleSidebar"><i style="font-size: 2rem" class="text-orange-600 fas fa-bars"></i></button>
+					<button class="text-gray-500 focus:outline-none focus:text-gray-700 lg:hidden" @click.stop="toggleSidebar"><i style="font-size: 2rem; color: #374151" class="fas fa-bars"></i></button>
 				</div>
 				<div style="flex: 1">
-					<b style="font-size: 1.1rem">TITULO DE LA PAGINA</b><br />
-					<span style="font-size: 0.8rem">Explicacion de las acciones</span>
+					<b style="font-size: 1.1rem">{{ route.meta.title }}</b
+					><br />
+					<span style="font-size: 0.8rem">{{ route.meta.subTitle }}</span>
 				</div>
 				<div class="flex items-center pr-4" style="column-gap: 5px">
 					<span>Nombre de Persona</span>
@@ -80,3 +86,9 @@ onUnmounted(() => {
 		</div>
 	</div>
 </template>
+
+<style>
+.clase-index {
+	z-index: 20 !important;
+}
+</style>

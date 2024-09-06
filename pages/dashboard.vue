@@ -1,6 +1,8 @@
-<script lang="ts" setup>
+<script setup lang="ts">
 definePageMeta({
 	layout: "general",
+	title: "Dashboard",
+	subTitle: "Pagina de inicio",
 });
 </script>
 
