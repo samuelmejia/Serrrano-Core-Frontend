@@ -46,22 +46,19 @@ onUnmounted(() => {
 	<div class="flex h-screen bg-gray-100">
 		<!-- Sidebar -->
 		<div
-			style="width: 16rem"
-			:class="[
-				'fixed flex flex-col inset-y-0 left-0 transform md:static md:translate-x-0 transition-transform duration-300 ease-in-out bg-gray-200 text-orange-600',
-				{ '-translate-x-full': !isSidebarOpen },
-			]"
+			style="width: 16rem; background-color: #374151"
+			:class="['fixed flex flex-col inset-y-0 left-0 transform md:static md:translate-x-0 transition-transform duration-300 ease-in-out text-white', { '-translate-x-full': !isSidebarOpen }]"
 			ref="sidebar"
 		>
 			<SideBar />
 		</div>
 
 		<!-- Main content -->
-		<div class="flex flex-col flex-1 overflow-y-auto" @click="handleClickOutside">
-			<div class="flex items-center justify-between h-16 bg-white border-b border-gray-100">
+		<div class="min-h-full flex flex-col flex-1 overflow-y-auto" @click="handleClickOutside">
+			<div class="flex items-center justify-between h-16 bg-white border-b border-gray-100 shadow-lg">
 				<div class="flex items-center px-4">
 					<!-- Botón para mostrar/ocultar el sidebar en tamaño móvil -->
-					<button class="text-gray-500 focus:outline-none focus:text-gray-700 md:hidden" @click.stop="toggleSidebar">Options</button>
+					<button class="text-gray-500 focus:outline-none focus:text-gray-700 md:hidden" @click.stop="toggleSidebar"><i style="font-size: 2rem" class="text-orange-600 fas fa-bars"></i></button>
 				</div>
 				<div style="flex: 1">
 					<b style="font-size: 1.1rem">TITULO DE LA PAGINA</b><br />
@@ -75,8 +72,10 @@ onUnmounted(() => {
 					-->
 				</div>
 			</div>
-			<div class="p-4">
-				<slot />
+			<div class="p-4 flex-1 flex flex-col">
+				<main class="flex-1 p-4 bg-white shadow-lg" style="border-radius: 5px">
+					<slot />
+				</main>
 			</div>
 		</div>
 	</div>
