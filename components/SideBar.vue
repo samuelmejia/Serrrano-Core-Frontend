@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import { ref } from "vue";
-
 function cerrarSesion() {
 	alert("Cerrar sesion");
 }
@@ -12,12 +10,12 @@ function cerrarSesion() {
 	</div>
 	<div style="height: 80%; font-size: 0.9rem" class="flex flex-col flex-1 overflow-y-auto">
 		<nav class="flex-1 px-2 py-4">
-			<a href="/dashboard" class="flex items-center px-4 py-1 mt-1 bg-[#4441] hover:bg-gray-200 hover-text-orange-600"> <i class="mr-2 fas fa-chart-line"></i> Dashboard</a>
+			<NuxtLink to="/dashboard" class="flex items-center px-4 py-1 mt-1 bg-[#4441] hover:bg-gray-200 hover-text-orange-600"> <i class="mr-2 fas fa-chart-line"></i> Dashboard</NuxtLink>
 			<div class="flex justify-center py-1">
 				<span style="border: 1px solid #ea580c; display: block; width: 80%"></span>
 			</div>
 			<div class="">
-				<ul class="">
+				<ul class="select-none">
 					<li>
 						<details class="group">
 							<summary class="cursor-pointer select-none flex items-center justify-between w-full px-4 py-1 mt-1 focus:outline-none hover:bg-gray-200 hover-text-orange-600">
@@ -26,8 +24,9 @@ function cerrarSesion() {
 								<i class="group-open:rotate-180 fas fa-chevron-up"></i>
 							</summary>
 							<div class="accordion-content ml-6" style="border-left: 1px solid">
-								<a href="/compras/levantamiento" class="flex items-center px-4 py-1 mt-1 hover:bg-gray-200 hover-text-orange-600">Gestionar Levantamiento</a>
-								<a href="#" class="flex items-center px-4 py-1 mt-1 hover:bg-gray-200 hover-text-orange-600">Opcion 1.2</a>
+								<NuxtLink to="/compras/productos" class="flex items-center px-4 py-1 mt-1 hover:bg-gray-200 hover-text-orange-600">Ver Productos</NuxtLink>
+								<NuxtLink to="/compras/levantamientos" class="flex items-center px-4 py-1 mt-1 hover:bg-gray-200 hover-text-orange-600">Levantamientos</NuxtLink>
+								<NuxtLink to="/compras/gestiones" class="flex items-center px-4 py-1 mt-1 hover:bg-gray-200 hover-text-orange-600">Gestiones Derivadas</NuxtLink>
 							</div>
 						</details>
 					</li>
@@ -71,7 +70,7 @@ function cerrarSesion() {
 								<i class="group-open:rotate-180 fas fa-chevron-up"></i>
 							</summary>
 							<div class="accordion-content ml-6" style="border-left: 1px solid">
-								<a href="#" class="flex items-center px-4 py-1 mt-1 hover:bg-gray-200 hover-text-orange-600">Sucursales / Almacenes</a>
+								<a href="/inventario/bodegas" class="flex items-center px-4 py-1 mt-1 hover:bg-gray-200 hover-text-orange-600">Sucursales / Bodegas</a>
 								<a href="#" class="flex items-center px-4 py-1 mt-1 hover:bg-gray-200 hover-text-orange-600">Productos</a>
 							</div>
 						</details>
@@ -92,9 +91,9 @@ function cerrarSesion() {
 				</ul>
 			</div>
 		</nav>
-		<span class="flex items-center px-4 py-1 my-4 hover:bg-gray-200 cursor-pointer hover-text-orange-600" @click="cerrarSesion">
-			<i class="mx-2 rotate-180 fas fa-sign-out-alt"></i> Cerrar Sesión</span
-		>
+		<div class="px-2 py-4 select-none">
+			<span class="flex px-2 py-1 items-center hover:bg-gray-200 cursor-pointer hover-text-orange-600" @click="cerrarSesion"> <i class="mx-2 rotate-180 fas fa-sign-out-alt"></i> Cerrar Sesión</span>
+		</div>
 	</div>
 </template>
 

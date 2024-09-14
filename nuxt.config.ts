@@ -1,7 +1,7 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 
 export default {
-	ssr: true,
+	ssr: false,
 	compatibilityDate: "2024-04-03",
 	devtools: { enabled: false },
 	modules: ["@element-plus/nuxt", "nuxt-echarts", "@nuxtjs/tailwindcss"],
@@ -11,9 +11,7 @@ export default {
 	},
 	runtimeConfig: {
 		public: {
-			SUPABASE_BASE_URL: process.env.SUPABASE_BASE_URL,
-			SUPABASE_REST_URL: process.env.SUPABASE_REST_URL,
-			SUPABASE_KEY: process.env.SUPABASE_KEY,
+			BASE_URL: process.env.BASE_URL,
 		},
 	},
 	tailwindcss: {

@@ -1,4 +1,8 @@
 <script setup lang="ts">
+import es from "element-plus/es/locale/lang/es";
+import RuntimeService from "~/services/RuntimeService";
+RuntimeService.getInstance(useRuntimeConfig());
+
 const route = useRoute();
 
 const isSidebarOpen = ref(false);
@@ -58,11 +62,9 @@ onUnmounted(() => {
 			<SideBar />
 		</div>
 
-		<!-- Main content -->
 		<div class="min-h-full flex flex-col flex-1 overflow-y-auto" @click="handleClickOutside">
 			<div class="flex items-center justify-between h-16 bg-white border-b border-gray-100 shadow-lg">
 				<div class="flex items-center px-4">
-					<!-- Botón para mostrar/ocultar el sidebar en tamaño móvil -->
 					<button class="text-gray-500 focus:outline-none focus:text-gray-700 lg:hidden" @click.stop="toggleSidebar"><i style="font-size: 2rem; color: #374151" class="fas fa-bars"></i></button>
 				</div>
 				<div style="flex: 1">
@@ -73,14 +75,13 @@ onUnmounted(() => {
 				<div class="flex items-center pr-4" style="column-gap: 5px">
 					<span>Nombre de Persona</span>
 					<img src="/img/serrano-icon.png" style="height: 40px" />
-					<!--
-					<button class="flex items-center text-gray-500 hover:text-gray-700 focus:outline-none focus:text-gray-700">Perfil</button>
-					-->
 				</div>
 			</div>
 			<div class="p-4 flex-1 flex flex-col">
 				<main class="flex-1 p-4 bg-white shadow-lg" style="border-radius: 5px">
-					<slot />
+					<ElConfigProvider :locale="es">
+						<slot />
+					</ElConfigProvider>
 				</main>
 			</div>
 		</div>

@@ -1,9 +1,9 @@
-import ComprasLevantamientoService from "../Services/ComprasLevantamientoService";
+import ProductosLevantamientoService from "../Services/ProductosLevantamientoService";
 
 export default class ComprasLevantamientoController {
-	public serviceListaLevantamiento;
+	public serviceProductos;
 
 	constructor() {
-		this.serviceListaLevantamiento = new ComprasLevantamientoService();
+		this.serviceProductos = new ProductosLevantamientoService();
 	}
 }

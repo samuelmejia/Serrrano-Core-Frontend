@@ -1,20 +1,18 @@
 <script setup lang="ts">
 import { Search } from "@element-plus/icons-vue";
 
-type TTituloTabla = {
-	campo: string;
-	filtroBusqueda: boolean;
-};
-
-export type { TTituloTabla };
-
 //Conjunto de Data en las propiedades del componente
 const props = defineProps<{
 	pageSize: number;
 	filter?: any[];
-	dataRecibida: object[];
+	usarFiltradoExterno: boolean;
+	dataRecibida: any[];
 	tamCampoBusqueda?: string;
+	defaultPage?: number | null;
+	defaultCampoBusqueda?: string | null;
 }>();
+
+const emit = defineEmits(["emitFiltradoExterno", "emitFiltradoLocal"]);
 
 //Variables Reactivas
 const campoBusqueda = ref("");
@@ -30,6 +28,10 @@ let dataMostrada = <object[]>[];
 function setPage(val: number) {
 	currentPage.value = val;
 	paginarDataTabla();
+}
+
+if (!!props.defaultCampoBusqueda) {
+	campoBusqueda.value = props.defaultCampoBusqueda;
 }
 
 //Funciones que afectan directamente a la data
@@ -54,11 +56,21 @@ function filtrarDataTabla() {
 		});
 	});
 
+	emit("emitFiltradoLocal");
 	paginarDataTabla();
 }
 
 //La paginaicacion es sencillmente mostrar la data parcialmente
 function paginarDataTabla() {
+	if (!!props.defaultPage) {
+		currentPage.value = props.defaultPage;
+
+		const paginasPosibles = dataFiltrada.length == 0 ? 0 : Math.ceil(dataFiltrada.length / props.pageSize);
+		if (currentPage.value > paginasPosibles) {
+			currentPage.value = paginasPosibles;
+		}
+	}
+
 	dataMostrada = dataFiltrada.slice(props.pageSize * currentPage.value - props.pageSize, props.pageSize * currentPage.value);
 	stampActualizacionRegistros.value++;
 }
@@ -73,7 +85,7 @@ function setSort(campoSort: object) {
 	direccionSort.value = direccionSort.value == 0 ? 1 : 0;
 
 	dataFiltrada = dataFiltrada.sort((a: any, b: any) => {
-		if (tipoDato == "text") {
+		if (tipoDato == "string") {
 			return direccionSort.value == 0 ? a[campoActual].localeCompare(b[campoActual]) : b[campoActual].localeCompare(a[campoActual]);
 		} else if (tipoDato == "number") {
 			return direccionSort.value == 0 ? a[campoActual] - b[campoActual] : b[campoActual] - a[campoActual];
@@ -105,37 +117,71 @@ function asignarIcono(campoActual: string) {
 	return `text-gray-300 fas fa-sort`;
 }
 
-filtrarDataTabla();
+function filtradoExterno() {
+	if (props.usarFiltradoExterno) {
+		emit("emitFiltradoExterno", campoBusqueda.value);
+	}
+}
+
 watch(campoBusqueda, filtrarDataTabla);
+
+const refInputB = ref<HTMLInputElement | null>(null);
+
+onMounted(() => {
+	if (!!props.defaultCampoBusqueda) {
+		campoBusqueda.value = props.defaultCampoBusqueda ?? "";
+		refInputB.value?.focus();
+	}
+
+	filtrarDataTabla();
+});
 </script>
 
 <template>
-	<el-input v-model="campoBusqueda" v-if="!!props.filter" :style="tamCampoBusqueda ? `width: ${tamCampoBusqueda}; ` : `width: 240px`" placeholder="Buscar" :suffix-icon="Search" />
-
-	<div class="overflow-x-auto mt-2 w-full">
-		<table class="table table-xs w-full border">
-			<thead>
-				<slot name="thead" :th="{ setSort, mostrarLabel }"></slot>
-			</thead>
-			<tbody class="divide-y divide-gray-100" v-if="dataMostrada.length > 0" style="display: block; min-height: 25rem">
-				<slot name="tbody" :dataMostrada="dataMostrada"></slot>
-			</tbody>
-			<tfoot class="divide-y divide-gray-100"></tfoot>
-		</table>
-		<div style="width: 40%">
-			<el-pagination
-				class="mt-2"
-				:key="stampActualizacionRegistros"
-				background
-				:hide-on-single-page="true"
-				layout="prev, pager, ->, total, next"
-				:current-page="currentPage"
-				:page-size="props.pageSize"
-				:total="dataFiltrada.length"
-				@current-change="setPage"
-			></el-pagination>
+	<article>
+		<div class="grid" style="grid-template-columns: 60% 40%">
+			<div class="flex items-center">
+				<el-input
+					ref="refInputB"
+					v-model="campoBusqueda"
+					@keyup.enter="filtradoExterno"
+					v-if="!!props.filter"
+					:style="tamCampoBusqueda ? `width: ${tamCampoBusqueda}; ` : `width: 240px`"
+					placeholder="Buscar"
+					:suffix-icon="Search"
+				/>
+				<el-button v-if="!!props.filter && usarFiltradoExterno" class="ml-2" type="primary" @click="filtradoExterno">Buscar</el-button>
+			</div>
+			<div class="flex items-center">
+				<slot name="botones"></slot>
+			</div>
 		</div>
-	</div>
+
+		<div class="overflow-x-auto mt-2 w-full">
+			<table class="table table-xs w-full border">
+				<thead>
+					<slot name="thead" :th="{ setSort, mostrarLabel }"></slot>
+				</thead>
+				<tbody class="divide-y divide-gray-100" v-if="dataMostrada.length > 0" style="display: block; min-height: 25rem">
+					<slot name="tbody" :dataMostrada="dataMostrada" :paginaActual="currentPage"></slot>
+				</tbody>
+				<tfoot class="divide-y divide-gray-100"></tfoot>
+			</table>
+			<div style="width: 40%">
+				<el-pagination
+					class="mt-2"
+					:key="stampActualizacionRegistros"
+					background
+					:hide-on-single-page="true"
+					layout="prev, pager, ->, total, next"
+					:current-page="currentPage"
+					:page-size="props.pageSize"
+					:total="dataFiltrada.length"
+					@current-change="setPage"
+				></el-pagination>
+			</div>
+		</div>
+	</article>
 </template>
 
 <style>
