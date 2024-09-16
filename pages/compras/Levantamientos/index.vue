@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import Detalles from "~/components/Compras.Levantamiento/Detalles.vue";
-import Productos from "~/pages/compras/Levantamiento/partials/Productos.vue";
+import Detalles from "~/components/Compras.Levantamiento/DetallesProductoModal.vue";
+import ProductosSection from "../Productos/partials/CarritoSection.vue";
+
 import TableFull from "~/components/TableFull.vue";
 import ComprasLevantamientoController from "~/modules/Module.Compras.Levantamiento/Controllers/ComprasLevantamientoController";
 import type { TProductoModel } from "~/modules/Module.Compras.Levantamiento/Types/TProductoModel";
@@ -36,12 +37,9 @@ async function cambiarEstadoAgregado(producto: TProductoModel) {
 	stampActualizacionAgregados.value++;
 }
 
-async function mostrarDetalleProducto(producto: TProductoModel) {
+async function mostrarDetalleLevantamiento(producto: TProductoModel) {
 	loadingState.mostrar = true;
 	loadingState.texto = "Cargando Detalle";
-
-	await controller.serviceProductos.getDetalleProducto(producto);
-
 	productoMostrarDetalle.value = producto;
 	mostrarDetallesModal.value = true;
 	loadingState.mostrar = false;
@@ -111,26 +109,15 @@ watch(mostrarRevisadosModal, (newValue) => {
 				<td class="text-right pr-6">{{ row.fechaUltimaVenta }}</td>
 				<td class="text-right pr-6">{{ row.fechaUltimaVenta }}</td>
 				<td>Pendiente</td>
-				<td class="text-center" :key="stampActualizacionRegistros">
+				<td class="text-center" :key="stampActualizacionRegistros" @click="mostrarDetalleLevantamiento(row)">
 					<el-button type="warning"><i class="fas fa-eye"></i></el-button>
 				</td>
 			</tr>
 		</template>
 	</TableFull>
 
-	<el-dialog style="min-height: 90vh; margin: 5vh auto" :modal="true" v-model="mostrarRevisadosModal" title="Productos en Proceso de Revisión" width="90%">
-		<Productos
-			v-if="controller.serviceProductos.getCantidadProductosAgregados() > 0"
-			:servicio-productos="controller.serviceProductos"
-			:stamp-reactivo="stampActualizacionAgregados"
-			@emit-producto-quitado-revision="quitarDeRevision"
-		/>
-	</el-dialog>
-
-	<el-dialog v-model="mostrarDetallesModal" title="Detalle de Producto" width="80%">
-		<div style="border-top: 1px solid gray" class="mt-0 pt-4">
-			<Detalles v-if="mostrarDetallesModal" :producto-visualizado="productoMostrarDetalle" />
-		</div>
+	<el-dialog v-model="mostrarDetallesModal" title="Detalle de Levantamiento" width="80%">
+		<div style="border-top: 1px solid gray" class="mt-0 pt-4">Informacion de Levantamiento</div>
 	</el-dialog>
 
 	<SpinnerLoading :visible="loadingState.mostrar" :texto-mostrar="loadingState.texto" />

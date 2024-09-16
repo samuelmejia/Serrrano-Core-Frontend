@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import Detalles from "~/components/Compras.Levantamiento/Detalles.vue";
+import DetallesProductoModal from "~/components/Compras.Levantamiento/DetallesProductoModal.vue";
+
 import { Delete } from "@element-plus/icons-vue";
 import type { CheckboxValueType } from "element-plus";
 
@@ -135,6 +136,10 @@ const mostrarDetallesModal = ref(false);
 const productoMostrarDetalle = ref(<TProductoModel>{});
 
 const tecladoFormulas = ref(false);
+
+function inputProducto(producto: TProductoDetalleModel, origen: string) {
+	console.log(origen, producto);
+}
 </script>
 
 <template>
@@ -253,20 +258,22 @@ const tecladoFormulas = ref(false);
 							<input
 								type="text"
 								class="text-center py-1 border-black"
+								v-model="row.encontrado"
+								@input="inputProducto(row, 'encontrado')"
 								:class="valoresChecks.includes(row.codigoTienda) ? 'border' : ''"
 								:disabled="!valoresChecks.includes(row.codigoTienda)"
 								style="width: 100%"
-								value=""
 							/>
 						</td>
 						<td class="px-2">
 							<input
 								type="text"
 								class="text-center py-1 border-black"
+								v-model="row.solicitado"
+								@input="inputProducto(row, 'solicitado')"
 								:class="valoresChecks.includes(row.codigoTienda) ? 'border' : ''"
 								:disabled="!valoresChecks.includes(row.codigoTienda)"
 								style="width: 100%"
-								value=""
 							/>
 						</td>
 					</tr>
@@ -292,7 +299,7 @@ const tecladoFormulas = ref(false);
 
 	<el-dialog v-model="mostrarDetallesModal" title="Detalle de Producto" width="80%">
 		<div style="border-top: 1px solid gray" class="mt-0 pt-4">
-			<Detalles v-if="mostrarDetallesModal" :producto-visualizado="productoMostrarDetalle" />
+			<DetallesProductoModal v-if="mostrarDetallesModal" :producto-visualizado="productoMostrarDetalle" />
 		</div>
 	</el-dialog>
 </template>
