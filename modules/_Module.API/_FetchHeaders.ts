@@ -6,6 +6,7 @@ export default class FetchHeaders {
 	private static instance: FetchHeaders | null = null;
 
 	static restURL = "";
+	static baseURL = "";
 	static headers: THeaders = {
 		"Content-Type": "application/json",
 	};
@@ -13,6 +14,7 @@ export default class FetchHeaders {
 	private constructor() {
 		FetchHeaders.headers["apikey"];
 		FetchHeaders.restURL = RuntimeService.getConfig().public.BASE_URL;
+		FetchHeaders.baseURL = RuntimeService.getConfig().public.BASE_URL;
 	}
 
 	public static getInstance() {

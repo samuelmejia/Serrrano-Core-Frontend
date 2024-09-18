@@ -3,7 +3,7 @@ import Detalles from "~/components/Compras.Levantamiento/DetallesProductoModal.v
 import ProductosSection from "../Productos/partials/CarritoSection.vue";
 
 import TableFull from "~/components/TableFull.vue";
-import ComprasLevantamientoController from "~/modules/Module.Compras.Levantamiento/Controllers/ComprasLevantamientoController";
+import ComprasLevantamientoController from "~/modules/Module.Compras.Levantamiento/Controllers/LevantamientoController";
 import type { TProductoModel } from "~/modules/Module.Compras.Levantamiento/Types/TProductoModel";
 import SpinnerLoading from "~/components/SpinnerLoading.vue";
 
@@ -24,14 +24,14 @@ const stampActualizacionAgregados = ref(0);
 
 const controller = new ComprasLevantamientoController();
 
-controller.serviceProductos.loadData().then(() => {
-	console.log("data cargada:: ", controller.serviceProductos.getAllProductos().length);
+controller.servicioProductos.loadData().then(() => {
+	console.log("data cargada:: ", controller.servicioProductos.getAllProductos().length);
 	stampActualizacionTabla.value++;
 	stampActualizacionRegistros.value++;
 });
 
 async function cambiarEstadoAgregado(producto: TProductoModel) {
-	await controller.serviceProductos.agregarProductoRevision(producto.codigo);
+	await controller.servicioProductos.agregarProductoRevision(producto.codigo);
 
 	stampActualizacionRegistros.value++;
 	stampActualizacionAgregados.value++;
@@ -57,7 +57,7 @@ async function llamarFiltradoExterno(valueBusqueda: string) {
 		return;
 	}
 
-	await controller.serviceProductos.filtrarProductos(valueBusqueda);
+	await controller.servicioProductos.filtrarProductos(valueBusqueda);
 	defaultCampoBusqueda = valueBusqueda;
 	stampActualizacionTabla.value++;
 }
@@ -84,8 +84,8 @@ watch(mostrarRevisadosModal, (newValue) => {
 		:key="stampActualizacionTabla"
 		tam-campo-busqueda="30%"
 		:default-campo-busqueda="defaultCampoBusqueda"
-		v-if="!!controller.serviceProductos.getAllProductos()"
-		:data-recibida="controller.serviceProductos.getAllProductos()"
+		v-if="!!controller.servicioProductos.getAllProductos()"
+		:data-recibida="controller.servicioProductos.getAllProductos()"
 		:filter="[{ codigo: 'string' }, { nombre: 'string' }, { modelo: 'string' }, { marca: 'string' }]"
 	>
 		<template v-slot:thead="{ th }">

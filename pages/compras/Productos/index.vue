@@ -4,7 +4,7 @@ import CarritoSection from "~/pages/compras/Productos/partials/CarritoSection.vu
 import TableFull from "~/components/TableFull.vue";
 import Numeros from "~/helpers/Numeros";
 import Texto from "~/helpers/Texto";
-import ComprasLevantamientoController from "~/modules/Module.Compras.Levantamiento/Controllers/ComprasLevantamientoController";
+import LevantamientoController from "~/modules/Module.Compras.Levantamiento/Controllers/LevantamientoController";
 import type { TProductoModel } from "~/modules/Module.Compras.Levantamiento/Types/TProductoModel";
 import SpinnerLoading from "~/components/SpinnerLoading.vue";
 
@@ -23,16 +23,15 @@ const stampActualizacionTabla = ref(0);
 const stampActualizacionRegistros = ref(0);
 const stampActualizacionAgregados = ref(0);
 
-const controller = new ComprasLevantamientoController();
+const controller = LevantamientoController.getInstance();
 
-controller.serviceProductos.loadData().then(() => {
-	console.log("data cargada:: ", controller.serviceProductos.getAllProductos().length);
+controller.servicioProductos.loadData().then(() => {
 	stampActualizacionTabla.value++;
 	stampActualizacionRegistros.value++;
 });
 
 async function cambiarEstadoAgregado(producto: TProductoModel) {
-	await controller.serviceProductos.agregarProductoRevision(producto.codigo);
+	await controller.agregarProductoLevantamiento(producto);
 
 	stampActualizacionRegistros.value++;
 	stampActualizacionAgregados.value++;
@@ -42,7 +41,7 @@ async function mostrarDetalleProducto(producto: TProductoModel) {
 	loadingState.mostrar = true;
 	loadingState.texto = "Cargando Detalle";
 
-	await controller.serviceProductos.getDetalleProducto(producto);
+	await controller.getDetalleProducto(producto);
 
 	productoMostrarDetalle.value = producto;
 	mostrarDetallesProductoModal.value = true;
@@ -61,12 +60,12 @@ async function llamarFiltradoExterno(valueBusqueda: string) {
 		return;
 	}
 
-	await controller.serviceProductos.filtrarProductos(valueBusqueda);
+	await controller.filtrarProductos(valueBusqueda);
 	defaultCampoBusqueda = valueBusqueda;
 	stampActualizacionTabla.value++;
 }
 
-function quitarDeRevision() {
+function quitarDeLevantamiento() {
 	actualizarListaAgregados();
 	stampActualizacionAgregados.value++;
 }
@@ -96,7 +95,7 @@ async function confirmarInicioLevantamiento() {
 		const res = await ElMessageBox.confirm("Desea iniciar un proceso de Levantamiento?");
 
 		if (res == "confirm") {
-			console.log("aperturar Levantamiento");
+			controller.iniciarLevantamiento();
 			levantamientoEnProceso.value = true;
 		}
 	} catch (e: any) {}
@@ -110,7 +109,7 @@ async function confirmarInicioLevantamiento() {
 		</div>
 		<div v-if="levantamientoEnProceso" class="flex flex-col">
 			<el-button type="info" :key="stampActualizacionAgregados" @click="mostrarRevisadosModal = !mostrarRevisadosModal"
-				>Productos en Revisión: {{ controller.serviceProductos.getCantidadProductosAgregados() }}<i class="ml-2 fas fa-box-open"></i
+				>Productos en Revisión: {{ controller.getCantidadProductosAgregadosLevantamiento() }}<i class="ml-2 fas fa-box-open"></i
 			></el-button>
 			<i style="font-size: 0.8rem">Click para ver el panel de revision</i>
 		</div>
@@ -122,8 +121,8 @@ async function confirmarInicioLevantamiento() {
 		:key="stampActualizacionTabla"
 		tam-campo-busqueda="30%"
 		:default-campo-busqueda="defaultCampoBusqueda"
-		v-if="!!controller.serviceProductos.getAllProductos()"
-		:data-recibida="controller.serviceProductos.getAllProductos()"
+		v-if="!!controller.servicioProductos.getAllProductos()"
+		:data-recibida="controller.servicioProductos.getAllProductos()"
 		:filter="[{ codigo: 'string' }, { nombre: 'string' }, { modelo: 'string' }, { marca: 'string' }]"
 	>
 		<template v-slot:thead="{ th }">
@@ -172,12 +171,7 @@ async function confirmarInicioLevantamiento() {
 	</TableFull>
 
 	<el-dialog style="min-height: 90vh; margin: 5vh auto" :before-close="handleControlCierreCarrito" v-model="mostrarRevisadosModal" title="Productos en Proceso de Revisión" width="90%">
-		<CarritoSection
-			v-if="controller.serviceProductos.getCantidadProductosAgregados() > 0"
-			:servicio-productos="controller.serviceProductos"
-			:stamp-reactivo="stampActualizacionAgregados"
-			@emit-producto-quitado-revision="quitarDeRevision"
-		/>
+		<CarritoSection v-if="controller.getCantidadProductosAgregadosLevantamiento() > 0" :stamp-reactivo="stampActualizacionAgregados" @emit-producto-quitado-levantamiento="quitarDeLevantamiento" />
 	</el-dialog>
 
 	<el-dialog v-model="mostrarDetallesProductoModal" title="Detalle de Producto" width="80%">

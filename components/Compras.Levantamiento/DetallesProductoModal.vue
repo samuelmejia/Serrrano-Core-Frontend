@@ -19,10 +19,10 @@ const props = defineProps<{
 			<tr style="font-size: 0.9rem" class="bg-gray-50 text-gray-700 px-4 py-3 select-none grid tr-tabla-detalles">
 				<th>UBICACION</th>
 				<th>RESERVADO</th>
-				<th>DISPONIBLE</th>
 				<th>TRANSITO</th>
 				<th>CONFIRMADO</th>
 				<th>EXISTENCIA</th>
+				<th>DISPONIBLE</th>
 				<th>MIN</th>
 				<th>MAX</th>
 			</tr>
@@ -33,10 +33,10 @@ const props = defineProps<{
 					{{ row.nombreTienda }}
 				</td>
 				<td class="text-center">{{ row.reservado }}</td>
-				<td class="text-center">{{ row.disponible }}</td>
 				<td class="text-center">{{ row.enTransito }}</td>
 				<td class="text-center">{{ row.confirmado }}</td>
 				<td class="text-center">{{ row.existencia }}</td>
+				<td class="text-center">{{ row.disponible }}</td>
 				<td class="text-center">{{ row.stockMinimo }}</td>
 				<td class="text-center">{{ row.stockMaximo }}</td>
 			</tr>

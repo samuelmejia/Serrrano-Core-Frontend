@@ -1,5 +1,5 @@
 type THeaders = {
-	[key: string]: string;
+	[key: string]: any;
 };
 
 export type { THeaders };

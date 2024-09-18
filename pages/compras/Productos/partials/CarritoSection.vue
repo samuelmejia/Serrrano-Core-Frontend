@@ -6,24 +6,25 @@ import type { CheckboxValueType } from "element-plus";
 
 import type { TProductoModel } from "~/modules/Module.Compras.Levantamiento/Types/TProductoModel";
 import type { TProductoDetalleModel } from "~/modules/Module.Compras.Levantamiento/Types/TProductoDetalleModel";
-import type ProductosLevantamientoService from "~/modules/Module.Compras.Levantamiento/Services/ProductosLevantamientoService";
+import LevantamientoController from "~/modules/Module.Compras.Levantamiento/Controllers/LevantamientoController";
+
+const controller = LevantamientoController.getInstance();
 
 //COMUNICACION DE COMPONENTE
 const props = defineProps<{
-	servicioProductos: ProductosLevantamientoService;
 	stampReactivo: number;
 }>();
 
-const emit = defineEmits(["emitProductoQuitadoRevision"]);
+const emit = defineEmits(["emitProductoQuitadoLevantamiento"]);
 
 watch(
 	() => props.stampReactivo,
 	() => {
-		dataRevision = props.servicioProductos.getListProductosAgregados();
+		dataRevision = controller.servicioLevantamiento.getListProductosAgregados();
 	}
 );
 
-let dataRevision = props.servicioProductos.getListProductosAgregados();
+let dataRevision = controller.servicioLevantamiento.getListProductosAgregados();
 
 //VARIABLES REACTIVAS
 const stampActualizacionDetalles = ref(0);
@@ -40,9 +41,9 @@ const defaultPageRevision = ref<number | null>(null);
 async function quitarDeRevision(producto: TProductoModel, paginaActual: number) {
 	defaultPageRevision.value = paginaActual;
 
-	await props.servicioProductos.quitarProductoRevision(producto.codigo);
-	dataRevision = props.servicioProductos.getListProductosAgregados();
-	emit("emitProductoQuitadoRevision");
+	await controller.servicioLevantamiento.quitarProductoLevantamiento(producto.codigo);
+	dataRevision = controller.servicioLevantamiento.getListProductosAgregados();
+	emit("emitProductoQuitadoLevantamiento");
 
 	setTimeout(() => {
 		defaultPageRevision.value = null;
