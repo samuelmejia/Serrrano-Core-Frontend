@@ -1,7 +1,7 @@
 type TUsuarioAPIModel = {
 	token: string;
 	timeExpire: number;
-	usuario: object;
+	usuario: string;
 };
 
 export type { TUsuarioAPIModel };

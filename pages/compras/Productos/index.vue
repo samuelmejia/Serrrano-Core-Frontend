@@ -33,6 +33,8 @@ controller.servicioProductos.loadData().then(() => {
 async function cambiarEstadoAgregado(producto: TProductoModel) {
 	await controller.agregarProductoLevantamiento(producto);
 
+	console.log("controller.getListProductosAgregadosLevantamiento()", controller.getListProductosAgregadosLevantamiento());
+
 	stampActualizacionRegistros.value++;
 	stampActualizacionAgregados.value++;
 }
@@ -100,6 +102,14 @@ async function confirmarInicioLevantamiento() {
 		}
 	} catch (e: any) {}
 }
+
+onMounted(() => {
+	controller.estatusLevantamiento().then((respuesta: boolean) => {
+		if (respuesta) {
+			levantamientoEnProceso.value = true;
+		}
+	});
+});
 </script>
 
 <template>

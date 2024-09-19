@@ -1,4 +1,30 @@
-<script setup lang="ts"></script>
+<script setup lang="ts">
+import Mensajes from "~/helpers/Mensajes";
+import UsuarioAPI from "~/modules/_Module.Info/UsuarioAPI";
+import RuntimeService from "~/services/RuntimeService";
+
+RuntimeService.getInstance(useRuntimeConfig());
+
+const usuarioAPI = new UsuarioAPI();
+
+const inputLogin = ref({
+	usuario: "",
+	pass: "",
+});
+
+async function iniciarSesionUsuario() {
+	if (inputLogin.value.usuario.toLowerCase() != "apineda") {
+		Mensajes.fallo("Usuario no encontrado");
+		return;
+	}
+
+	const res = await usuarioAPI.iniciarSesion(inputLogin.value.usuario, inputLogin.value.pass);
+
+	if (!!res.status) {
+		navigateTo("/dashboard");
+	}
+}
+</script>
 
 <template>
 	<div class="py-16" style="height: 100vh; display: flex; align-items: center">
@@ -15,17 +41,25 @@
 				</div>
 				<div class="mt-4">
 					<label class="block text-gray-700 text-sm font-bold mb-2">Usuario</label>
-					<input class="bg-gray-200 text-gray-700 focus:outline-none focus:shadow-outline border border-gray-300 rounded py-2 px-4 block w-full appearance-none" type="email" />
+					<input
+						v-model="inputLogin.usuario"
+						class="bg-gray-200 text-gray-700 focus:outline-none focus:shadow-outline border border-gray-300 rounded py-2 px-4 block w-full appearance-none"
+						type="email"
+					/>
 				</div>
 				<div class="mt-4">
 					<div class="flex justify-between">
 						<label class="block text-gray-700 text-sm font-bold mb-2">Contraseña</label>
-						<a href="#" class="text-xs text-gray-500">Olvidé mi contraseña</a>
+						<a href="#" tabindex="-1" class="text-xs text-gray-500">Olvidé mi contraseña</a>
 					</div>
-					<input class="bg-gray-200 text-gray-700 focus:outline-none focus:shadow-outline border border-gray-300 rounded py-2 px-4 block w-full appearance-none" type="password" />
+					<input
+						v-model="inputLogin.pass"
+						class="bg-gray-200 text-gray-700 focus:outline-none focus:shadow-outline border border-gray-300 rounded py-2 px-4 block w-full appearance-none"
+						type="password"
+					/>
 				</div>
 				<div class="mt-8">
-					<span @click="navigateTo('/dashboard')" style="display: block; text-align: center" class="cursor-pointer bg-gray-700 text-white font-bold py-2 px-4 w-full rounded hover:bg-gray-600"
+					<span @click="iniciarSesionUsuario" style="display: block; text-align: center" class="cursor-pointer bg-gray-700 text-white font-bold py-2 px-4 w-full rounded hover:bg-gray-600"
 						>Ingresar</span
 					>
 				</div>

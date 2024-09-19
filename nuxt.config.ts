@@ -4,7 +4,7 @@ export default {
 	ssr: false,
 	compatibilityDate: "2024-04-03",
 	devtools: { enabled: false },
-	modules: ["@element-plus/nuxt", "nuxt-echarts", "@nuxtjs/tailwindcss"],
+	modules: ["@pinia/nuxt", "@pinia-plugin-persistedstate/nuxt", "@element-plus/nuxt", "nuxt-echarts", "@nuxtjs/tailwindcss"],
 	echarts: {
 		charts: ["BarChart"],
 		components: ["DatasetComponent", "GridComponent", "TooltipComponent"],

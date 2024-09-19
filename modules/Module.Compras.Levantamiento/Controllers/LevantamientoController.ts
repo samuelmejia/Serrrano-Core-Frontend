@@ -1,5 +1,6 @@
 import LevantamientoService from "../Services/LevantamientoService";
 import ProductosService from "../Services/ProductosService";
+import { useStoreLevantamiento } from "../Services/useStoreLevantamiento";
 import type { TProductoModel } from "../Types/TProductoModel";
 
 export default class LevantamientoController {
@@ -10,6 +11,8 @@ export default class LevantamientoController {
 	private constructor() {
 		this.servicioLevantamiento = new LevantamientoService();
 		this.servicioProductos = new ProductosService();
+
+		this.estatusLevantamiento();
 	}
 
 	public static getInstance(): LevantamientoController {
@@ -22,16 +25,23 @@ export default class LevantamientoController {
 
 	//--------------------------- Levantamiento
 
-	async estatusLevantamiento(): Promise<void> {
-		//pendiente, se debe extraer de la BD al abrir la ventana
+	async estatusLevantamiento(): Promise<boolean> {
+		//return this.servicioLevantamiento.statusLevantamiento();
+
+		const storeLevantamiento = useStoreLevantamiento();
+		return !!storeLevantamiento.get && !!storeLevantamiento.get.id;
 	}
 
 	async iniciarLevantamiento(): Promise<void> {
-		await this.servicioLevantamiento.iniciarLevantamiento();
+		//await this.servicioLevantamiento.iniciarLevantamiento();
+
+		await this.servicioLevantamiento.statusLevantamiento();
+		const storeLevantamiento = useStoreLevantamiento();
+		storeLevantamiento.set(this.servicioLevantamiento.infoLevantamiento);
 	}
 
 	async agregarProductoLevantamiento(producto: TProductoModel): Promise<void> {
-		await this.servicioLevantamiento.agregarProductoLevantamiento(producto.codigo);
+		await this.servicioLevantamiento.agregarProductoLevantamiento(producto);
 	}
 
 	async quitarProductoLevantamiento(producto: TProductoModel): Promise<void> {

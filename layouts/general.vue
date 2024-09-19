@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import es from "element-plus/es/locale/lang/es";
+import TokenAPI from "~/modules/_Module.API/TokenAPI";
 import RuntimeService from "~/services/RuntimeService";
 RuntimeService.getInstance(useRuntimeConfig());
 
@@ -36,6 +37,8 @@ onUnmounted(() => {
 	document.removeEventListener("click", handleClickOutside);
 	document.removeEventListener("keyup", handleKeyup);
 });
+
+TokenAPI.getInstance();
 </script>
 
 <template>
@@ -73,7 +76,7 @@ onUnmounted(() => {
 					<span style="font-size: 0.8rem">{{ route.meta.subTitle }}</span>
 				</div>
 				<div class="flex items-center pr-4" style="column-gap: 5px">
-					<span>Nombre de Persona</span>
+					<span> {{ TokenAPI.getUsuario() }} </span>
 					<img src="/img/serrano-icon.png" style="height: 40px" />
 				</div>
 			</div>

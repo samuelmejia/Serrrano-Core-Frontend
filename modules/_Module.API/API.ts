@@ -13,6 +13,7 @@ export default class API {
 
 	constructor() {
 		FetchHeaders.getInstance();
+		FetchHeaders.actualizarTokenEnHeaders();
 		this.baseRestURL = FetchHeaders.baseURL;
 	}
 
@@ -52,7 +53,7 @@ export default class API {
 		}
 	}
 
-	public async post<T>(nombreRuta: string, bodyData: any): Promise<T | null> {
+	public async post<T>(nombreRuta: string, bodyData: any = null): Promise<T | null> {
 		if (!nombreRuta || nombreRuta.length == 0) {
 			throw new Error(`La ruta ${nombreRuta} no está definida.`);
 		}
@@ -62,14 +63,17 @@ export default class API {
 		const options: RequestInit = {
 			method: "POST",
 			headers: FetchHeaders.headers,
-			body: JSON.stringify(bodyData),
 		};
+
+		if (bodyData != null) {
+			options.body = JSON.stringify(bodyData);
+		}
 
 		try {
 			const response = await fetch(url, options);
 
 			if (!response.ok) {
-				throw new (await response.json())();
+				throw await response.json();
 			}
 
 			const data: T = await response.json();
@@ -97,7 +101,7 @@ export default class API {
 			const response = await fetch(url, options);
 
 			if (!response.ok) {
-				throw new (await response.json())();
+				throw await response.json();
 			}
 
 			const data: T = await response.json();

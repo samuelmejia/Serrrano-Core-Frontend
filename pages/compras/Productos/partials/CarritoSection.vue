@@ -7,6 +7,7 @@ import type { CheckboxValueType } from "element-plus";
 import type { TProductoModel } from "~/modules/Module.Compras.Levantamiento/Types/TProductoModel";
 import type { TProductoDetalleModel } from "~/modules/Module.Compras.Levantamiento/Types/TProductoDetalleModel";
 import LevantamientoController from "~/modules/Module.Compras.Levantamiento/Controllers/LevantamientoController";
+import DataLevantamientoService from "~/modules/Module.Compras.Levantamiento/Services/DataLevantamientoService";
 
 const controller = LevantamientoController.getInstance();
 
@@ -141,6 +142,8 @@ const tecladoFormulas = ref(false);
 function inputProducto(producto: TProductoDetalleModel, origen: string) {
 	console.log(origen, producto);
 }
+
+const servicioData = new DataLevantamientoService();
 </script>
 
 <template>
@@ -267,15 +270,11 @@ function inputProducto(producto: TProductoDetalleModel, origen: string) {
 							/>
 						</td>
 						<td class="px-2">
-							<input
-								type="text"
-								class="text-center py-1 border-black"
-								v-model="row.solicitado"
-								@input="inputProducto(row, 'solicitado')"
-								:class="valoresChecks.includes(row.codigoTienda) ? 'border' : ''"
-								:disabled="!valoresChecks.includes(row.codigoTienda)"
-								style="width: 100%"
-							/>
+							<select class="bg-white border py-1 rounded">
+								<template v-for="estado of servicioData.getEstadosProductoLevantamiento()">
+									<option :value="estado.id">{{ estado.descripcion }}</option>
+								</template>
+							</select>
 						</td>
 					</tr>
 				</template>

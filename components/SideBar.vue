@@ -1,6 +1,17 @@
 <script setup lang="ts">
+import Mensajes from "~/helpers/Mensajes";
+import TokenAPI from "~/modules/_Module.API/TokenAPI";
+
 function cerrarSesion() {
-	alert("Cerrar sesion");
+	Mensajes.advertencia("Cerrando sesion");
+
+	setTimeout(() => {
+		if (!!window.localStorage) {
+			localStorage.clear();
+			sessionStorage.clear();
+			location.href = "/";
+		}
+	}, 1000);
 }
 </script>
 

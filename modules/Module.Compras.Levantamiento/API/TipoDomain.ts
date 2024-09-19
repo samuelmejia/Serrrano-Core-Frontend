@@ -24,4 +24,26 @@ type TDetalleProductoDomain = {
 	prdStockMaximo: number;
 };
 
-export type { TProductoDomain, TDetalleProductoDomain };
+type TLevantamientoActualDomain = {
+	id: number;
+	fechaCreacion: string;
+	fechaCierre: string | null;
+	usuarioResponsable: string;
+	ipAddress: string;
+	area: string;
+	pasillo: string | null;
+	observaciones: string | null;
+	estado: string;
+};
+
+type TProductoLevantamientoDomain = {
+	id: number;
+	idLevantamiento: number;
+	codProducto: string;
+	descripcion: string;
+	fechaHora: string;
+	observaciones: string;
+	estado: string;
+};
+
+export type { TProductoDomain, TDetalleProductoDomain, TLevantamientoActualDomain, TProductoLevantamientoDomain };

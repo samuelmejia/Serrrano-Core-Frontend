@@ -2,18 +2,57 @@ import Mensajes from "~/helpers/Mensajes";
 import type { TProductoModel } from "../Types/TProductoModel";
 import LevantamientoAPI from "../API/LevantamientoAPI";
 import ProductosAPI from "../API/ProductosAPI";
+import type { TLevantamientoActualDomain } from "../API/TipoDomain";
+import Fechas from "~/helpers/Fechas";
+import type { TLevantamientoActualModel } from "../Types/TLevantamientoActualModel";
+import { useStoreLevantamientoProductos } from "./useStoreLevantamientoProductos";
 
 export default class LevantamientoService {
 	api;
 	data: Map<string, TProductoModel>;
+	infoLevantamiento = <TLevantamientoActualModel>{};
 
 	constructor() {
 		this.api = new LevantamientoAPI();
 		this.data = new Map<string, TProductoModel>();
+
+		const storeProductos = useStoreLevantamientoProductos();
+
+		if (!!storeProductos.get && storeProductos.get.length > 0)
+			for (let p of storeProductos.get) {
+				this.data.set(p.codigo, p);
+			}
 	}
 
 	async loadData(): Promise<void> {
 		//Cargar productos que existen en el levantamiento
+	}
+
+	async statusLevantamiento(): Promise<boolean> {
+		const respuesta = await this.api.POST_StatusLevantamiento();
+
+		//levantamientoActual
+		let lA = <TLevantamientoActualModel>{};
+
+		if (respuesta.estado && !!respuesta.body) {
+			const b = respuesta.body;
+			(lA.area = b.area),
+				(lA.id = b.id),
+				(lA.fechaCreacion = b.fechaCreacion ? Fechas.Date_To_String(new Date(b.fechaCreacion)) : ""),
+				(lA.horaCreacion = b.fechaCreacion ? Fechas.Time_To_String(new Date(b.fechaCreacion)) : ""),
+				(lA.fechaCierre = b.fechaCierre ? Fechas.Date_To_String(new Date(b.fechaCierre)) : ""),
+				(lA.horaCierre = b.fechaCierre ? Fechas.Time_To_String(new Date(b.fechaCierre)) : ""),
+				(lA.usuarioResponsable = b.usuarioResponsable),
+				(lA.ipAddress = b.ipAddress),
+				(lA.area = b.area),
+				(lA.pasillo = b.pasillo || ""),
+				(lA.observaciones = b.observaciones || ""),
+				(lA.estado = b.estado);
+		}
+
+		this.infoLevantamiento = lA;
+
+		return respuesta.estado;
 	}
 
 	async iniciarLevantamiento(): Promise<void> {
@@ -24,11 +63,11 @@ export default class LevantamientoService {
 		else Mensajes.fallo(respuesta.mensaje);
 	}
 
-	async agregarProductoLevantamiento(codigo: string): Promise<void> {
-		const producto = this.data.get(codigo);
-
+	async agregarProductoLevantamiento(producto: TProductoModel): Promise<void> {
+		console.log("LevantamientoService -> agregarProductoLevantamiento");
 		if (!!producto) {
-			const respuesta = await this.api.POST_QuitarProductoLevantamiento(codigo);
+			/*
+			const respuesta = await this.api.POST_AgregarProductoLevantamiento(codigo);
 
 			if (respuesta.estado) {
 				producto.estadoAgregado = true;
@@ -36,6 +75,15 @@ export default class LevantamientoService {
 
 				await this.getDetalleProducto(producto);
 			}
+			*/
+
+			producto.estadoAgregado = true;
+			this.data.set(producto.codigo, producto);
+
+			await this.getDetalleProducto(producto);
+
+			const storeProductos = useStoreLevantamientoProductos();
+			storeProductos.set(this.getListProductosAgregados());
 		}
 	}
 
@@ -43,11 +91,17 @@ export default class LevantamientoService {
 		const producto = this.data.get(codigo);
 
 		if (!!producto) {
+			/*
 			const respuesta = await this.api.POST_QuitarProductoLevantamiento(codigo);
 			if (respuesta.estado) {
 				producto.estadoAgregado = false;
 				this.data.set(codigo, producto);
-			}
+			}*/
+
+			producto.estadoAgregado = false;
+			this.data.set(codigo, producto);
+			const storeProductos = useStoreLevantamientoProductos();
+			storeProductos.set(this.getListProductosAgregados());
 		}
 	}
 

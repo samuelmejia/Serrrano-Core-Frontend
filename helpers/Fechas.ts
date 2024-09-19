@@ -1,11 +1,21 @@
 export default class Fechas {
-	static ISO_To_String(date: Date) {
+	static Date_To_String(date: Date) {
 		const year = date.getFullYear();
 		const month = String(date.getMonth() + 1).padStart(2, "0");
 		const day = String(date.getDate()).padStart(2, "0");
 
 		const formattedDate = `${year}-${month}-${day}`;
 		return formattedDate;
+	}
+
+	static Time_To_String(date: Date) {
+		let hours = date.getHours();
+		const minutes = date.getMinutes().toString().padStart(2, "0");
+		const tt = hours >= 12 ? "PM" : "AM";
+		hours = hours % 12 || 12;
+		const formattedTime = `${hours.toString().padStart(2, "0")}:${minutes} ${tt}`;
+
+		return formattedTime;
 	}
 
 	static String_To_Timestamp(fecha: string): number {
@@ -19,14 +29,14 @@ export default class Fechas {
 
 	static Fecha_Actual(): string {
 		const date = new Date();
-		return Fechas.ISO_To_String(date);
+		return Fechas.Date_To_String(date);
 	}
 
 	static Inicio_Mes_Actual(): string {
 		const date = new Date();
 		date.setDate(1);
 
-		return Fechas.ISO_To_String(date);
+		return Fechas.Date_To_String(date);
 	}
 
 	static Inicio_Anho_Actual(): string {
@@ -34,7 +44,7 @@ export default class Fechas {
 		date.setMonth(0);
 		date.setDate(1);
 
-		return Fechas.ISO_To_String(date);
+		return Fechas.Date_To_String(date);
 	}
 
 	static monthsComplete = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];

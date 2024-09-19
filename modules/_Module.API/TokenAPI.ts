@@ -49,11 +49,11 @@ export default class TokenAPI {
 		return dataToken.token || "";
 	}
 
-	static getUsuario(): TDataUsuario {
+	static getUsuario(): string {
 		const dataJSON = window.localStorage.getItem(TokenAPI.direccionLS) || "{}";
 		const dataToken = <TUsuarioAPIModel>JSON.parse(dataJSON);
 
-		return <TDataUsuario>dataToken.usuario;
+		return <string>dataToken.usuario;
 	}
 
 	static getMinutosRestantes(): number {

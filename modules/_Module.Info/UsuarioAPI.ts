@@ -1,86 +1,56 @@
-import FetchHeaders from "~/Modules/_Module.API/_FetchHeaders";
+import FetchHeaders from "../_Module.API/_FetchHeaders";
+import API from "../_Module.API/API";
+import TokenAPI from "../_Module.API/TokenAPI";
+import type { TUsuarioAPIModel } from "../_Module.API/TUsuarioAPIModel";
+
+/*import FetchHeaders from "~/Modules/_Module.API/_FetchHeaders";
 import TokenAPI from "~/Modules/_Module.API/TokenAPI";
 import RuntimeService from "~/services/RuntimeService";
-import type { TUsuarioAPIModel } from "~/Modules/_Module.API/TUsuarioAPIModel";
+import API from "../_Module.API/API";
+*/
+
+type TRespuestaAuth = {
+	idUsuario: string;
+	token: string;
+	refreshToken: string;
+	expiraTime: string;
+	msg: string;
+};
 
 export default class UsuarioAPI {
-	private baseURL = "";
-
 	constructor() {
-		this.baseURL = RuntimeService.getConfig().public.BASE_URL;
 		TokenAPI.getInstance();
 	}
 
 	async iniciarSesion(email: string, password: string): Promise<{ status: boolean; mensaje: string }> {
-		const REST_API_INICIAR_SESION = `${this.baseURL}/api/Auth`;
+		const api = new API();
+		const resData = await api.post<TRespuestaAuth>("/Auth", {
+			Correo: "test@gmail.com",
+			Password: "test",
+		});
 
-		try {
-			const response = await fetch(REST_API_INICIAR_SESION, {
-				method: "POST",
-				headers: FetchHeaders.headers,
-				body: JSON.stringify({
-					Correo: email,
-					Password: password,
-				}),
-			});
-
-			const data = await response.json();
-
-			if (!response.ok) {
-				throw data;
-			}
-
+		if (!!resData) {
 			let dataToken: TUsuarioAPIModel = {
-				token: data.access_token,
-				timeExpire: data.expires_at,
-				usuario: data.usuario,
+				token: resData.token,
+				timeExpire: 50000, //TODO: obtener el tiempo correcto
+				usuario: resData.idUsuario,
 			};
 
 			TokenAPI.setDataToken(dataToken);
 
 			return {
 				status: true,
-				mensaje: "ok",
-			};
-		} catch (e: any) {
-			console.log("ERR:: iniciarSesion::", e.error_description);
-			return {
-				status: false,
-				mensaje: e.mensaje,
+				mensaje: resData.msg,
 			};
 		}
+
+		return {
+			status: false,
+			mensaje: "No ingreso",
+		};
 	}
 
-	async solicitarRestablecerContrasena(email: string) {
-		const REST_API_SOLICITAR = `${this.baseURL}/auth/v1/recover`;
-
-		try {
-			const response = await fetch(REST_API_SOLICITAR, {
-				method: "POST",
-				headers: FetchHeaders.headers,
-				body: JSON.stringify({
-					email: email,
-				}),
-			});
-
-			const data = await response.json();
-
-			if (!response.ok) {
-				throw data;
-			}
-
-			return {
-				status: true,
-				mensaje: "ok",
-			};
-		} catch (e: any) {
-			console.log("ERR:: solicitarRestablecerContrasena::", e.error_description);
-			return {
-				status: false,
-				mensaje: e.error_description,
-			};
-		}
-	}
+	async solicitarRestablecerContrasena(email: string) {}
 
 	cerrarSesion() {
 		if (!!window) {
