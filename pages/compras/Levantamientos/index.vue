@@ -6,6 +6,7 @@ import TableFull from "~/components/TableFull.vue";
 import ComprasLevantamientoController from "~/modules/Module.Compras.Levantamiento/Controllers/LevantamientoController";
 import type { TProductoModel } from "~/modules/Module.Compras.Levantamiento/Types/TProductoModel";
 import SpinnerLoading from "~/components/SpinnerLoading.vue";
+import LevantamientoController from "~/modules/Module.Compras.Levantamiento/Controllers/LevantamientoController";
 
 definePageMeta({
 	layout: "general",
@@ -22,7 +23,7 @@ const stampActualizacionTabla = ref(0);
 const stampActualizacionRegistros = ref(0);
 const stampActualizacionAgregados = ref(0);
 
-const controller = new ComprasLevantamientoController();
+const controller = LevantamientoController.getInstance();
 
 controller.servicioProductos.loadData().then(() => {
 	console.log("data cargada:: ", controller.servicioProductos.getAllProductos().length);
@@ -31,7 +32,7 @@ controller.servicioProductos.loadData().then(() => {
 });
 
 async function cambiarEstadoAgregado(producto: TProductoModel) {
-	await controller.servicioProductos.agregarProductoRevision(producto.codigo);
+	await controller.agregarProductoLevantamiento(producto);
 
 	stampActualizacionRegistros.value++;
 	stampActualizacionAgregados.value++;
@@ -62,7 +63,7 @@ async function llamarFiltradoExterno(valueBusqueda: string) {
 	stampActualizacionTabla.value++;
 }
 
-function quitarDeRevision() {
+function quitarDeLevantamiento() {
 	actualizarListaAgregados();
 	stampActualizacionAgregados.value++;
 }

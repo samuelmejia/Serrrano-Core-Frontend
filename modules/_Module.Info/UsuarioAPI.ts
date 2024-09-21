@@ -1,3 +1,4 @@
+import Mensajes from "~/helpers/Mensajes";
 import FetchHeaders from "../_Module.API/_FetchHeaders";
 import API from "../_Module.API/API";
 import TokenAPI from "../_Module.API/TokenAPI";
@@ -46,7 +47,7 @@ export default class UsuarioAPI {
 
 		return {
 			status: false,
-			mensaje: "No ingreso",
+			mensaje: "",
 		};
 	}
 

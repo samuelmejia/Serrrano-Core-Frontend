@@ -1,7 +1,6 @@
 import LevantamientoService from "../Services/LevantamientoService";
 import ProductosService from "../Services/ProductosService";
-import { useStoreLevantamiento } from "../Services/useStoreLevantamiento";
-import type { TProductoModel } from "../Types/TProductoModel";
+import type { TLevantamientoProductoModel, TProductoModel } from "../Types/TProductoModel";
 
 export default class LevantamientoController {
 	private static instance: LevantamientoController | null;
@@ -26,29 +25,33 @@ export default class LevantamientoController {
 	//--------------------------- Levantamiento
 
 	async estatusLevantamiento(): Promise<boolean> {
-		//return this.servicioLevantamiento.statusLevantamiento();
+		return this.servicioLevantamiento.statusLevantamiento();
+	}
 
-		const storeLevantamiento = useStoreLevantamiento();
-		return !!storeLevantamiento.get && !!storeLevantamiento.get.id;
+	async loadProductosLevantamiento(): Promise<void> {
+		await this.servicioLevantamiento.loadData();
 	}
 
 	async iniciarLevantamiento(): Promise<void> {
-		//await this.servicioLevantamiento.iniciarLevantamiento();
-
-		await this.servicioLevantamiento.statusLevantamiento();
-		const storeLevantamiento = useStoreLevantamiento();
-		storeLevantamiento.set(this.servicioLevantamiento.infoLevantamiento);
+		await this.servicioLevantamiento.iniciarLevantamiento();
 	}
 
 	async agregarProductoLevantamiento(producto: TProductoModel): Promise<void> {
 		await this.servicioLevantamiento.agregarProductoLevantamiento(producto);
+
+		const encontrado = this.servicioLevantamiento.getProductoUnico(producto.codigo);
+		//Si se encuentra significa que si esta en el carrito
+		if (!!encontrado) {
+			producto.estadoAgregado = true;
+			this.servicioProductos.actualizarEstadoProductoListado(producto.codigo, true);
+		}
 	}
 
 	async quitarProductoLevantamiento(producto: TProductoModel): Promise<void> {
 		await this.servicioLevantamiento.quitarProductoLevantamiento(producto.codigo);
 	}
 
-	getListProductosAgregadosLevantamiento(): TProductoModel[] {
+	getListProductosAgregadosLevantamiento(): TLevantamientoProductoModel[] {
 		return this.servicioLevantamiento.getListProductosAgregados();
 	}
 
@@ -56,8 +59,8 @@ export default class LevantamientoController {
 		return this.servicioLevantamiento.getCantidadProductosAgregados();
 	}
 
-	async loadProductosLevantamiento(): Promise<void> {
-		//pendiente, se debe extraer de la BD cuando ya existe el carrito lleno
+	async actualizarProductoLevantamiento(producto: TLevantamientoProductoModel): Promise<void> {
+		await this.servicioLevantamiento.actualizarProductoLevantamiento(producto);
 	}
 
 	//--------------------------- Productos
@@ -76,5 +79,17 @@ export default class LevantamientoController {
 
 	async getDetalleProducto(producto: TProductoModel): Promise<void> {
 		await this.servicioProductos.getDetalleProducto(producto);
+	}
+
+	actualizarEstadoProductoListado(codigo: string): void {
+		this.servicioProductos.actualizarEstadoProductoListado(codigo, true);
+	}
+
+	getProductoEspecifico(codigo: string): TProductoModel | null {
+		const productoDevuelto = this.servicioProductos.getProductoEspecifico(codigo);
+		if (!!productoDevuelto) {
+			return productoDevuelto;
+		}
+		return null;
 	}
 }

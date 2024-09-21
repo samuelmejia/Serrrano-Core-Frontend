@@ -2,7 +2,7 @@ import { defineStore } from "pinia";
 import piniaPluginPersistedstate from "pinia-plugin-persistedstate";
 import type { TProductoModel } from "../Types/TProductoModel";
 
-export const useStoreLevantamientoProductos = defineStore({
+export const LevantamientoProductosStore = defineStore({
 	id: "pinia-levantamiento-productos",
 
 	state: () => {

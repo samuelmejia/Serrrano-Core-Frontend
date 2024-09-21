@@ -1,10 +1,21 @@
 <script setup lang="ts">
+import LevantamientoController from "~/modules/Module.Compras.Levantamiento/Controllers/LevantamientoController";
 import type { TProductoDetalleModel } from "~/modules/Module.Compras.Levantamiento/Types/TProductoDetalleModel";
 import type { TProductoModel } from "~/modules/Module.Compras.Levantamiento/Types/TProductoModel";
 
 const props = defineProps<{
-	productoVisualizado: TProductoModel;
+	codigo: string;
 }>();
+
+const controller = LevantamientoController.getInstance();
+
+const productoVisualizado = ref<TProductoModel>(<TProductoModel>{});
+
+const productoDevuelto = controller.getProductoEspecifico(props.codigo);
+
+if (!!productoDevuelto) {
+	productoVisualizado.value = productoDevuelto;
+}
 </script>
 
 <template>

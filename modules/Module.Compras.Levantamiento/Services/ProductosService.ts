@@ -33,6 +33,18 @@ export default class ProductosService {
 		return Array.from(this.data.values());
 	}
 
+	getProductoEspecifico(codigo: string): TProductoModel | undefined {
+		return this.data.get(codigo);
+	}
+
+	actualizarEstadoProductoListado(codigo: string, estado: boolean): void {
+		const productoActual = this.data.get(codigo);
+		if (!!productoActual) {
+			productoActual.estadoAgregado = estado;
+			this.data.set(productoActual.codigo, productoActual);
+		}
+	}
+
 	async getDetalleProducto(producto: TProductoModel): Promise<void> {
 		const detalles = await this.api.GET_DetalleProducto(producto.codigo);
 

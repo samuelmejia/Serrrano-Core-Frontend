@@ -4,7 +4,7 @@ import DetallesProductoModal from "~/components/Compras.Levantamiento/DetallesPr
 import { Delete } from "@element-plus/icons-vue";
 import type { CheckboxValueType } from "element-plus";
 
-import type { TProductoModel } from "~/modules/Module.Compras.Levantamiento/Types/TProductoModel";
+import type { TLevantamientoProductoModel, TProductoModel } from "~/modules/Module.Compras.Levantamiento/Types/TProductoModel";
 import type { TProductoDetalleModel } from "~/modules/Module.Compras.Levantamiento/Types/TProductoDetalleModel";
 import LevantamientoController from "~/modules/Module.Compras.Levantamiento/Controllers/LevantamientoController";
 import DataLevantamientoService from "~/modules/Module.Compras.Levantamiento/Services/DataLevantamientoService";
@@ -29,9 +29,9 @@ let dataRevision = controller.servicioLevantamiento.getListProductosAgregados();
 
 //VARIABLES REACTIVAS
 const stampActualizacionDetalles = ref(0);
-const productoVisualizado = ref<TProductoModel | null>(dataRevision[0]);
+const productoVisualizado = ref<TLevantamientoProductoModel | null>(dataRevision[0]);
 
-function cambiarProductoMostrado(producto: TProductoModel) {
+function cambiarProductoMostrado(producto: TLevantamientoProductoModel) {
 	productoVisualizado.value = producto;
 
 	stampActualizacionDetalles.value++;
@@ -39,7 +39,7 @@ function cambiarProductoMostrado(producto: TProductoModel) {
 
 const defaultPageRevision = ref<number | null>(null);
 
-async function quitarDeRevision(producto: TProductoModel, paginaActual: number) {
+async function quitarDeLevantamiento(producto: TLevantamientoProductoModel, paginaActual: number) {
 	defaultPageRevision.value = paginaActual;
 
 	await controller.servicioLevantamiento.quitarProductoLevantamiento(producto.codigo);
@@ -127,20 +127,28 @@ function finalizarAnular() {
 function guardarProgreso() {
 	console.log("guardar..");
 	alert(`Guardar productos hasta el momento`);
+
+	//guardar todos los productos, aunque la EndPoint sea de 1 a 1
+
+	for (let producto of dataRevision) {
+		controller.actualizarProductoLevantamiento(producto);
+	}
 }
 
-function verDetalleProducto(producto: TProductoModel) {
+const mostrarDetallesModal = ref(false);
+const productoMostrarDetalle = ref(<TLevantamientoProductoModel>{});
+function verDetalleProducto(producto: TLevantamientoProductoModel) {
 	productoMostrarDetalle.value = producto;
 	mostrarDetallesModal.value = true;
 }
 
-const mostrarDetallesModal = ref(false);
-const productoMostrarDetalle = ref(<TProductoModel>{});
-
 const tecladoFormulas = ref(false);
 
-function inputProducto(producto: TProductoDetalleModel, origen: string) {
-	console.log(origen, producto);
+function ingresoProducto(detalle: TProductoDetalleModel, origen: string) {
+	if (!!productoVisualizado.value && !!productoVisualizado.value.detalles) {
+		const index = productoVisualizado.value.detalles.findIndex((x) => x.codigoTienda == detalle.codigoTienda);
+		productoVisualizado.value.detalles[index] = detalle;
+	}
 }
 
 const servicioData = new DataLevantamientoService();
@@ -150,7 +158,6 @@ const servicioData = new DataLevantamientoService();
 	<div style="border-top: 1px solid gray" class="mb-4"></div>
 	<div class="grid" style="grid-template-columns: 54% 45%; column-gap: 1%">
 		<div class="flex items-center space-x-2">
-			<!--
 			<span>Selecccionar Bodegas:</span>
 			<el-select v-model="valoresChecks" multiple clearable collapse-tags placeholder="Bodegas trabajadas" popper-class="custom-header" :max-collapse-tags="1" style="width: 240px">
 				<template #header>
@@ -158,16 +165,11 @@ const servicioData = new DataLevantamientoService();
 				</template>
 				<el-option v-for="item in bodegasExistentes" :key="item.value" :class="{ 'custom-selected': valoresChecks.includes(item.value) }" :label="item.label" :value="item.value" />
 			</el-select>
-			-->
 		</div>
-		<div class="flex justify-between py-2">
-			<div class="flex items-end py-1">
-				<div class="cursor-pointer flex items-center justify-between space-x-2 text-white bg-[#67c23a] px-4 hover:bg-[#7d4]">
-					<span @click="guardarProgreso" class="menu-hover my-1 py-1"> Guardar Progreso </span>
-				</div>
-			</div>
+		<div class="flex select-none justify-between py-2">
+			<div class="flex items-end py-1"></div>
 			<div class="group relative cursor-pointer py-1">
-				<div class="flex items-center justify-between space-x-2 text-white bg-[#67c23a] px-4 hover:bg-[#7d4]">
+				<div class="flex items-center justify-between space-x-2 text-white bg-orange-400 px-4 hover:bg-orange-300">
 					<span class="menu-hover my-1 py-1"> Opciones </span>
 					<i class="fas fa-ellipsis-v"></i>
 				</div>
@@ -192,7 +194,7 @@ const servicioData = new DataLevantamientoService();
 			:filter="[{ nombre: 'string' }]"
 		>
 			<template v-slot:thead="{ th }">
-				<tr style="font-size: 0.9rem" class="bg-gray-50 text-gray-700 px-2 py-3 select-none grid tr-tabla-revision">
+				<tr style="font-size: 0.9rem" class="bg-gray-50 text-gray-700 px-2 py-2 select-none grid tr-tabla-revision">
 					<th>CODIGO</th>
 					<th>NOMBRE</th>
 					<th>DETALLE</th>
@@ -204,22 +206,18 @@ const servicioData = new DataLevantamientoService();
 					class="grid py-1 cursor-pointer hover:bg-gray-200 tr-tabla-revision"
 					:class="!!productoVisualizado && productoVisualizado.codigo == row.codigo ? 'bg-gray-100' : ''"
 					style="font-size: 0.9rem"
-					v-for="row of <TProductoModel[]>dataMostrada"
+					v-for="row of <TLevantamientoProductoModel[]>dataMostrada"
 					@click="cambiarProductoMostrado(row)"
 				>
 					<td class="flex items-center justify-center">{{ row.codigo }}</td>
 					<td class="text-left">
-						<p>{{ row.nombre }}</p>
-						<p>
-							<b>Marca:</b> {{ row.modelo }} | <b>Linea:</b> {{ row.linea }} <br />
-							<b>Categoria:</b> {{ row.categoria }}
-						</p>
+						<p>{{ row.descripcion }}</p>
 					</td>
 					<td class="flex items-center justify-center">
-						<el-button type="info" @click="verDetalleProducto(row)" plain>Ver</el-button>
+						<el-button type="info" plain @click="verDetalleProducto(row)" style="width: min-content"><i class="fas fa-eye"></i></el-button>
 					</td>
 					<td class="flex items-center justify-center">
-						<el-button type="danger" @click="quitarDeRevision(row, paginaActual)" :icon="Delete" circle />
+						<el-button type="danger" @click="quitarDeLevantamiento(row, paginaActual)" :icon="Delete" circle />
 					</td>
 				</tr>
 			</template>
@@ -229,18 +227,20 @@ const servicioData = new DataLevantamientoService();
 				:key="stampActualizacionDetalles"
 				:usar-filtrado-externo="false"
 				:page-size="10"
-				:data-recibida="!!productoVisualizado && !!productoVisualizado.detalleExistencias ? productoVisualizado.detalleExistencias : []"
+				:data-recibida="!!productoVisualizado && !!productoVisualizado.detalles ? productoVisualizado.detalles : []"
 			>
-				<template v-slot:botones>
-					<el-switch v-model="tecladoFormulas" inactive-text="Teclado Simple" active-text="Teclado Formulas" />
+				<template #botones>
+					<div @click="guardarProgreso" class="cursor-pointer select-none flex justify-start space-x-2 text-white bg-[#67c23a] px-4 hover:bg-[#7d4]">
+						<span class="menu-hover my-1 py-1"> Guardar Progreso </span>
+					</div>
 				</template>
-				<template v-slot:thead="{ th }">
-					<tr style="font-size: 0.9rem" class="bg-gray-50 text-gray-700 px-4 py-3 select-none grid tr-tabla-detalles">
+				<template #thead="{ th }">
+					<tr style="font-size: 0.9rem" class="bg-gray-50 text-gray-700 py-2 select-none grid tr-tabla-detalles">
 						<th>UBICACION</th>
-						<th>DISP</th>
-						<th>EXIST</th>
+						<th>EXIST.</th>
+						<th>DISP.</th>
 						<th>MOV.</th>
-						<th>ENCONTRADO</th>
+						<th>ENCONT.</th>
 						<th>SOLICITADO</th>
 					</tr>
 				</template>
@@ -255,22 +255,22 @@ const servicioData = new DataLevantamientoService();
 						<td class="text-left pl-2">
 							{{ row.nombreTienda }}
 						</td>
-						<td class="text-center">{{ row.disponible }}</td>
 						<td class="text-center">{{ row.existencia }}</td>
+						<td class="text-center">{{ row.disponible }}</td>
 						<td class="text-center">{{ row.movimiento | 0 }}</td>
 						<td class="px-2">
 							<input
 								type="text"
 								class="text-center py-1 border-black"
 								v-model="row.encontrado"
-								@input="inputProducto(row, 'encontrado')"
+								@input="ingresoProducto(row, 'encontrado')"
 								:class="valoresChecks.includes(row.codigoTienda) ? 'border' : ''"
 								:disabled="!valoresChecks.includes(row.codigoTienda)"
 								style="width: 100%"
 							/>
 						</td>
 						<td class="px-2">
-							<select class="bg-white border py-1 rounded">
+							<select v-model="row.solicitar" @change="ingresoProducto(row, 'solicitar')" class="bg-white border py-1 pl-1 rounded" :disabled="!valoresChecks.includes(row.codigoTienda)">
 								<template v-for="estado of servicioData.getEstadosProductoLevantamiento()">
 									<option :value="estado.id">{{ estado.descripcion }}</option>
 								</template>
@@ -285,12 +285,12 @@ const servicioData = new DataLevantamientoService();
 					<div class="flex flex-col">
 						<span><b>Código: </b> {{ productoVisualizado.codigo }}</span>
 
-						<span><b>Nombre: </b> {{ productoVisualizado.nombre }}</span>
+						<span><b>Nombre: </b> {{ productoVisualizado.descripcion }}</span>
 					</div>
 
 					<div class="flex flex-col">
 						<b>Observaciones:</b>
-						<textarea class="border w-full"></textarea>
+						<textarea v-model="productoVisualizado.observaciones" class="border w-full"></textarea>
 					</div>
 				</div>
 			</fieldset>
@@ -299,7 +299,7 @@ const servicioData = new DataLevantamientoService();
 
 	<el-dialog v-model="mostrarDetallesModal" title="Detalle de Producto" width="80%">
 		<div style="border-top: 1px solid gray" class="mt-0 pt-4">
-			<DetallesProductoModal v-if="mostrarDetallesModal" :producto-visualizado="productoMostrarDetalle" />
+			<DetallesProductoModal v-if="mostrarDetallesModal" :codigo="productoMostrarDetalle.codigo" />
 		</div>
 	</el-dialog>
 </template>
@@ -331,13 +331,17 @@ const servicioData = new DataLevantamientoService();
 }
 
 .tr-tabla-detalles {
-	grid-template-columns: 2fr 1fr 1fr 1fr 1fr 1fr;
+	grid-template-columns: 2fr 1fr 1fr 1fr 1fr 2fr;
 }
 
 .tr-detalles_no-usar {
-	color: #ddd !important;
+	color: #bbb;
 
 	input[type="text"] {
+		user-select: none;
+	}
+	select {
+		filter: opacity(0.1);
 		user-select: none;
 	}
 }

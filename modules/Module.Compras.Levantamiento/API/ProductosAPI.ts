@@ -1,7 +1,7 @@
 import type { TProductoModel } from "../Types/TProductoModel";
 import type { TProductoDetalleModel } from "../Types/TProductoDetalleModel";
 import API from "~/modules/_Module.API/API";
-import type { TDetalleProductoDomain, TProductoDomain } from "./TipoDomain";
+import type { TDetalleProductoDomain, TProductoDomain } from "../_Data/TipoDomain";
 
 export default class ProductosAPI {
 	constructor() {}
@@ -22,9 +22,11 @@ export default class ProductosAPI {
 					stockTotal: x.stockTotal,
 					impuesto: +x.impuesto,
 					estadoAgregado: false,
+					observaciones: "",
 					fechaUltimaCompra: x.fechaUltimaCompra,
 					fechaUltimaVenta: x.fechaUltimaVenta,
 					estado: x.estado,
+					detalleExistencias: [],
 				};
 			});
 		}
@@ -48,9 +50,11 @@ export default class ProductosAPI {
 					stockTotal: x.stockTotal,
 					impuesto: +x.impuesto,
 					estadoAgregado: false,
+					observaciones: "",
 					fechaUltimaCompra: x.fechaUltimaCompra,
 					fechaUltimaVenta: x.fechaUltimaVenta,
 					estado: x.estado,
+					detalleExistencias: [],
 				};
 			});
 		}

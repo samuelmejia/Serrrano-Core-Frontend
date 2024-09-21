@@ -1,3 +1,4 @@
+import Mensajes from "~/helpers/Mensajes";
 import FetchHeaders from "./_FetchHeaders";
 import type { THeaders } from "./_THeaders";
 
@@ -79,6 +80,7 @@ export default class API {
 			const data: T = await response.json();
 			return data;
 		} catch (error: any) {
+			Mensajes.fallo(error);
 			console.error(`ERR_POST:: en la ruta ${nombreRuta}:`, error);
 			return null;
 		}
@@ -129,13 +131,16 @@ export default class API {
 			const response = await fetch(url, options);
 
 			if (!response.ok) {
-				throw new (await response.json())();
+				throw (await response.json())();
 			}
 
 			const data: T = await response.json();
 			return data;
 		} catch (error: any) {
+			console.log("error", error);
 			console.error(`ERR_DELETE:: en la ruta ${nombreRuta}:`, error);
+
+			Mensajes.fallo(error.message);
 			return null;
 		}
 	}

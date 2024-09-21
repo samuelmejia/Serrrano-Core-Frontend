@@ -11,7 +11,7 @@ type TProductoDetalleModel = {
 	stockMaximo: number;
 	movimiento: number;
 	encontrado: number;
-	solicitado: number;
+	solicitar: string;
 };
 
 export type { TProductoDetalleModel };

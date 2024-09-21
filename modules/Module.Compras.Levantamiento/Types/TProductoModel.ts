@@ -12,7 +12,18 @@ type TProductoModel = {
 	fechaUltimaCompra: string;
 	fechaUltimaVenta: string;
 	estadoAgregado: boolean;
-	detalleExistencias?: TProductoDetalleModel[];
+	detalleExistencias: TProductoDetalleModel[];
+};
+
+type TLevantamientoProductoModel = {
+	id: number;
+	idLevantamiento: number;
+	codigo: string;
+	descripcion: string;
+	fecha: string;
+	hora: string;
+	observaciones: string;
+	detalles?: TProductoDetalleModel[];
 };
 
 type TLevantamientoDomain = {
@@ -27,4 +38,4 @@ type TLevantamientoDomain = {
 	idEstado: string;
 };
 
-export type { TProductoModel };
+export type { TProductoModel, TLevantamientoProductoModel, TLevantamientoDomain };

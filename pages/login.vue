@@ -5,6 +5,11 @@ import RuntimeService from "~/services/RuntimeService";
 
 RuntimeService.getInstance(useRuntimeConfig());
 
+const loadingState = reactive({
+	mostrar: false,
+	texto: "",
+});
+
 const usuarioAPI = new UsuarioAPI();
 
 const inputLogin = ref({
@@ -18,10 +23,15 @@ async function iniciarSesionUsuario() {
 		return;
 	}
 
+	loadingState.mostrar = true;
+	loadingState.texto = "Iniciando sesión...";
+
 	const res = await usuarioAPI.iniciarSesion(inputLogin.value.usuario, inputLogin.value.pass);
 
-	if (!!res.status) {
+	if (res.status) {
 		navigateTo("/dashboard");
+	} else {
+		loadingState.mostrar = false;
 	}
 }
 </script>
@@ -66,4 +76,6 @@ async function iniciarSesionUsuario() {
 			</div>
 		</div>
 	</div>
+
+	<SpinnerLoading :visible="loadingState.mostrar" :texto-mostrar="loadingState.texto" />
 </template>

@@ -36,14 +36,15 @@ type TLevantamientoActualDomain = {
 	estado: string;
 };
 
-type TProductoLevantamientoDomain = {
+type TLevantamientoProductoDomain = {
 	id: number;
 	idLevantamiento: number;
 	codProducto: string;
 	descripcion: string;
 	fechaHora: string;
 	observaciones: string;
-	estado: string;
+	estado: number;
+	detalles: TDetalleProductoDomain[];
 };
 
-export type { TProductoDomain, TDetalleProductoDomain, TLevantamientoActualDomain, TProductoLevantamientoDomain };
+export type { TProductoDomain, TDetalleProductoDomain, TLevantamientoActualDomain, TLevantamientoProductoDomain };

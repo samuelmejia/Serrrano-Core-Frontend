@@ -139,13 +139,12 @@ onMounted(() => {
 
 <template>
 	<article>
-		<div class="grid" style="grid-template-columns: 60% 40%">
-			<div class="flex items-center">
+		<div class="grid" style="grid-template-columns: 60% 40%; min-height: 3rem">
+			<div v-if="!!props.filter" class="flex items-center">
 				<el-input
 					ref="refInputB"
 					v-model="campoBusqueda"
 					@keyup.enter="filtradoExterno"
-					v-if="!!props.filter"
 					:style="tamCampoBusqueda ? `width: ${tamCampoBusqueda}; ` : `width: 240px`"
 					placeholder="Buscar"
 					:suffix-icon="Search"

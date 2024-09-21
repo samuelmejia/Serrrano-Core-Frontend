@@ -3,6 +3,8 @@
 export default {
 	ssr: false,
 	compatibilityDate: "2024-04-03",
+	pages: true,
+	typescript: "strict",
 	devtools: { enabled: false },
 	modules: ["@pinia/nuxt", "@pinia-plugin-persistedstate/nuxt", "@element-plus/nuxt", "nuxt-echarts", "@nuxtjs/tailwindcss"],
 	echarts: {
@@ -18,3 +20,4 @@ export default {
 		jit: true,
 	},
 };
+8;
