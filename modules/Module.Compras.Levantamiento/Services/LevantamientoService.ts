@@ -17,9 +17,6 @@ export default class LevantamientoService {
 
 	async loadProductosLevantamiento(): Promise<void> {
 		const respuesta = await this.api.GET_GetProductosLevantamiento(this.infoLevantamiento.id);
-
-		console.log("respuesta de Load", respuesta);
-
 		if (respuesta.estado && respuesta.body.length > 0) {
 			for (let p of <TLevantamientoProductoModel[]>respuesta.body) {
 				this.data.set(p.codigo, p);
@@ -37,8 +34,6 @@ export default class LevantamientoService {
 	}
 
 	async iniciarLevantamiento(): Promise<boolean> {
-		console.log("LevantamientoService -> iniciarLevantamiento");
-
 		const respuesta = await this.api.POST_IniciarLevantamiento();
 		if (respuesta.estado) Mensajes.exito(respuesta.mensaje);
 
@@ -56,7 +51,7 @@ export default class LevantamientoService {
 			fecha: "",
 			hora: "",
 			observaciones: "",
-			detallesInventario: [],
+			detalleExistencias: [],
 			detalles: [],
 		};
 	}
@@ -65,16 +60,11 @@ export default class LevantamientoService {
 		const productoLevantamiento = this.convertirEnTipoLevantamiento(this.infoLevantamiento.id, producto);
 
 		if (!!producto && !this.data.has(producto.codigo)) {
-			console.log("agregarProductoLevantamiento:: ", this.infoLevantamiento.id, productoLevantamiento.codigo);
 			let respuesta = await this.api.POST_AgregarProductoLevantamiento(this.infoLevantamiento.id, productoLevantamiento);
 
 			if (respuesta.estado) {
-				if (productoLevantamiento.detallesInventario.length === 0) {
-					await this.getDetalleProducto(productoLevantamiento);
-				}
-
 				this.data.set(productoLevantamiento.codigo, productoLevantamiento);
-				this.getDetalleProducto(productoLevantamiento);
+				this.getDetalleDeProductoEnLevantamiento(productoLevantamiento); //corre asyncronamente
 			}
 		}
 	}
@@ -90,15 +80,13 @@ export default class LevantamientoService {
 		}
 	}
 
-	async getDetalleProducto(producto: TLevantamientoProductoModel): Promise<void> {
-		const apiProducto = new ProductosAPI();
+	async getDetalleDeProductoEnLevantamiento(producto: TLevantamientoProductoModel): Promise<void> {
+		const detalles = await this.api.GET_DetalleProducto(producto.codigo);
 
-		if (!!producto.detalles) return;
-
-		const detalles = await apiProducto.GET_DetalleProducto(producto.codigo);
-
-		producto.detalles = detalles;
-		this.data.set(producto.codigo, producto);
+		if (!!detalles) {
+			producto.detalleExistencias = detalles;
+			this.data.set(producto.codigo, producto);
+		}
 	}
 
 	getListProductosAgregados(): TLevantamientoProductoModel[] {
@@ -113,7 +101,7 @@ export default class LevantamientoService {
 		const encontrado = this.data.get(codigo);
 
 		if (!!encontrado) {
-			return this.getListProductosAgregados()[0];
+			return encontrado;
 		}
 		return null;
 	}

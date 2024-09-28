@@ -1,6 +1,7 @@
 import Mensajes from "~/helpers/Mensajes";
 import ProductosLevantamientoAPI from "../API/ProductosAPI";
 import type { TProductoModel } from "../Types/TProductoModel";
+import type { TProductoDetalleModel } from "../Types/TProductoDetalleModel";
 
 export default class ProductosService {
 	api;
@@ -45,21 +46,13 @@ export default class ProductosService {
 		}
 	}
 
-	//se utiliza si es que no se encuentra ningun producto en la lista, pero se quiere traer de la API
-	async getDetalleProductoById(codigo: string): Promise<void> {
-		await this.filtrarProductos(codigo);
-
-		const productoDevuelto = this.getProductoEspecifico(codigo);
-
-		if (!!productoDevuelto && productoDevuelto.detalleExistencias.length === 0) {
-			await this.getDetalleProducto(productoDevuelto);
-		}
-	}
-
-	async getDetalleProducto(producto: TProductoModel): Promise<void> {
+	//Duplicado en LevantamientoService, pero facilita asignar detalles a un producto asi
+	async getDetalleDeProductoEnProductos(producto: TProductoModel): Promise<void> {
 		const detalles = await this.api.GET_DetalleProducto(producto.codigo);
 
-		producto.detalleExistencias = detalles;
-		this.data.set(producto.codigo, producto);
+		if (!!detalles) {
+			producto.detalleExistencias = detalles;
+			this.data.set(producto.codigo, producto);
+		}
 	}
 }

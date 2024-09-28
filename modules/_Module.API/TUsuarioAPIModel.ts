@@ -22,7 +22,7 @@ type TPermisoTiendaModel = {
 
 type TUsuarioAPIModel = {
 	token: string;
-	timeExpire: number;
+	timeExpire: Date;
 	idUsuario: string;
 	nombre: string;
 	usuarioTiendas: TPermisoTiendaModel[];

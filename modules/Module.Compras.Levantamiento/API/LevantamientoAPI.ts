@@ -1,8 +1,9 @@
 import API from "~/modules/_Module.API/API";
-import type { TLevantamientoActualDomain, TLevantamientoProductoDomain } from "../_Data/TipoDomain";
+import type { TDetalleProductoDomain, TLevantamientoActualDomain, TLevantamientoProductoDomain } from "../_Data/TipoDomain";
 import type { TLevantamientoProductoModel } from "../Types/TProductoModel";
 import type { TLevantamientoActualModel } from "../Types/TLevantamientoActualModel";
 import Fechas from "~/helpers/Fechas";
+import type { TProductoDetalleModel } from "../Types/TProductoDetalleModel";
 
 export default class LevantamientoAPI {
 	constructor() {}
@@ -144,7 +145,7 @@ export default class LevantamientoAPI {
 			fecha: Fechas.Date_To_String(new Date(producto.fechaHora)),
 			hora: Fechas.Time_To_String(new Date(producto.fechaHora)),
 			observaciones: producto.observaciones,
-			detallesInventario: [],
+			detalleExistencias: [],
 			detalles: [],
 		};
 	}
@@ -166,5 +167,29 @@ export default class LevantamientoAPI {
 			estado: false,
 			body: [],
 		};
+	}
+
+	async GET_DetalleProducto(param_codigo: string): Promise<TProductoDetalleModel[]> {
+		const api = new API();
+		const resData = await api.get<TDetalleProductoDomain[]>("/Producto/ExistenciaProducto", { busqueda: param_codigo });
+
+		if (!!resData) {
+			return resData.map((x: TDetalleProductoDomain) => {
+				return <TProductoDetalleModel>{
+					codigo: x.id,
+					codigoTienda: x.tndID,
+					nombreTienda: x.tndNombre,
+					reservado: x.reservado,
+					enTransito: x.enTransito,
+					confirmado: x.confirmado,
+					existencia: x.existencia,
+					disponible: x.disponible,
+					stockMinimo: x.prdStockMinimo,
+					stockMaximo: x.prdStockMaximo,
+				};
+			});
+		}
+
+		return [];
 	}
 }

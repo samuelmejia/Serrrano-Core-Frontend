@@ -31,6 +31,8 @@ let dataRevision = controller.servicioLevantamiento.getListProductosAgregados();
 
 //VARIABLES REACTIVAS
 const stampActualizacionDetalles = ref(0);
+const stampActualizacionExistencias = ref(0);
+
 const productoVisualizado = ref<TLevantamientoProductoModel | null>(dataRevision[0]);
 
 function cambiarProductoMostrado(producto: TLevantamientoProductoModel) {
@@ -174,8 +176,23 @@ function guardarProgreso() {
 
 const mostrarDetallesModal = ref(false);
 const productoMostrarDetalle = ref(<TLevantamientoProductoModel>{});
+
 function verDetalleProducto(producto: TLevantamientoProductoModel) {
+	console.log("ver detalle", producto);
 	productoMostrarDetalle.value = producto;
+	stampActualizacionExistencias.value++;
+
+	if (producto.detalleExistencias.length == 0) {
+		controller.getDetalleDeProductoEnLevantamiento(producto).then(() => {
+			console.log("cargo de manera asincrona");
+			const resProducto = controller.servicioLevantamiento.getProductoUnico(producto.codigo);
+			if (!!resProducto) {
+				productoMostrarDetalle.value = resProducto;
+				stampActualizacionExistencias.value++;
+			}
+		});
+	}
+
 	mostrarDetallesModal.value = true;
 }
 
@@ -221,6 +238,7 @@ const servicioData = new DataLevantamientoService();
 	</div>
 	<div style="grid-template-columns: 54% 45%; column-gap: 1%" class="grid">
 		<TableFull
+			:espacio-botones="true"
 			:key="props.stampReactivo"
 			:usar-filtrado-externo="false"
 			:page-size="5"
@@ -260,7 +278,7 @@ const servicioData = new DataLevantamientoService();
 			</template>
 		</TableFull>
 		<div>
-			<TableFull :key="stampActualizacionDetalles" :usar-filtrado-externo="false" :page-size="10" :data-recibida="ejemploDetalle">
+			<TableFull :espacio-botones="true" :key="stampActualizacionDetalles" :usar-filtrado-externo="false" :page-size="10" :data-recibida="ejemploDetalle">
 				<template #botones>
 					<div @click="guardarProgreso" class="cursor-pointer select-none flex justify-start space-x-2 text-white bg-[#67c23a] px-4 hover:bg-[#7d4]">
 						<span class="menu-hover my-1 py-1"> Guardar Progreso </span>
@@ -331,7 +349,13 @@ const servicioData = new DataLevantamientoService();
 
 	<el-dialog v-model="mostrarDetallesModal" title="Detalle de Producto" width="80%">
 		<div style="border-top: 1px solid gray" class="mt-0 pt-4">
-			<DetallesProductoModal v-if="mostrarDetallesModal" :codigo="productoMostrarDetalle.codigo" />
+			<DetallesProductoModal
+				:key="stampActualizacionExistencias"
+				v-if="mostrarDetallesModal"
+				:codigo="productoMostrarDetalle.codigo"
+				:descripcion="productoMostrarDetalle.descripcion"
+				:detalle-existencias="productoMostrarDetalle.detalleExistencias"
+			/>
 		</div>
 	</el-dialog>
 </template>

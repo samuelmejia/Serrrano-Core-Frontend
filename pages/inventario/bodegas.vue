@@ -14,7 +14,6 @@ const servicio = new BodegasLevantamientoService();
 let dataBodega = <TBodegaModel[]>[];
 
 servicio.loadData().then(() => {
-	console.log("Data cargada 1", dataBodega);
 	stampActualizacionRegistros.value++;
 });
 </script>

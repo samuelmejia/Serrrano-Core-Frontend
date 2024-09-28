@@ -63,17 +63,20 @@ export default class TokenAPI {
 		return <string>dataToken.nombre;
 	}
 
+	static getTiempoRestanteMinutos(): number {
+		const dataJSON = window.localStorage.getItem(TokenAPI.direccionLS) || "{}";
+		const dataToken = <TUsuarioAPIModel>JSON.parse(dataJSON);
+
+		const fechaActual = new Date();
+		const fechaExpiracion = new Date(dataToken.timeExpire);
+
+		return Math.floor((fechaExpiracion.getTime() - fechaActual.getTime()) / (60 * 1000));
+	}
+
 	static getPermisosTienda(): TPermisoTiendaModel[] {
 		const dataJSON = window.localStorage.getItem(TokenAPI.direccionLS) || "{}";
 		const dataToken = <TUsuarioAPIModel>JSON.parse(dataJSON);
 
 		return dataToken.usuarioTiendas;
-	}
-
-	static getMinutosRestantes(): number {
-		const dataJSON = window.localStorage.getItem(TokenAPI.direccionLS) || "{}";
-		const dataToken = <TUsuarioAPIModel>JSON.parse(dataJSON);
-
-		return dataToken.timeExpire; // minutos
 	}
 }

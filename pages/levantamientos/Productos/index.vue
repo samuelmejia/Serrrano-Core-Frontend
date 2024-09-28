@@ -23,6 +23,7 @@ const loadingState = reactive({
 const stampActualizacionTabla = ref(0);
 const stampActualizacionRegistros = ref(0);
 const stampActualizacionAgregados = ref(0);
+const stampActualizacionExistencias = ref(0);
 
 const controller = LevantamientoController.getInstance();
 
@@ -38,7 +39,12 @@ async function mostrarDetalleProducto(producto: TProductoModel) {
 	loadingState.mostrar = true;
 	loadingState.texto = "Cargando Detalle";
 
-	await controller.getDetalleProducto(producto);
+	if (producto.detalleExistencias.length == 0) {
+		controller.getDetalleDeProductoEnProductos(producto).then(() => {
+			productoMostrarDetalle.value = producto;
+			stampActualizacionExistencias.value++;
+		});
+	}
 
 	productoMostrarDetalle.value = producto;
 	mostrarDetallesProductoModal.value = true;
@@ -198,7 +204,13 @@ setTimeout(() => {
 
 	<el-dialog v-model="mostrarDetallesProductoModal" title="Detalle de Producto" width="80%">
 		<div style="border-top: 1px solid gray" class="mt-0 pt-4">
-			<DetallesProductoModal v-if="mostrarDetallesProductoModal" :codigo="productoMostrarDetalle.codigo" />
+			<DetallesProductoModal
+				:key="stampActualizacionExistencias"
+				v-if="mostrarDetallesProductoModal"
+				:codigo="productoMostrarDetalle.codigo"
+				:descripcion="productoMostrarDetalle.nombre"
+				:detalle-existencias="productoMostrarDetalle.detalleExistencias"
+			/>
 		</div>
 	</el-dialog>
 

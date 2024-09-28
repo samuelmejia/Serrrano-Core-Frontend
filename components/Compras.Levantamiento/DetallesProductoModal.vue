@@ -1,31 +1,19 @@
 <script setup lang="ts">
-import LevantamientoController from "~/modules/Module.Compras.Levantamiento/Controllers/LevantamientoController";
 import type { TProductoDetalleModel } from "~/modules/Module.Compras.Levantamiento/Types/TProductoDetalleModel";
-import type { TProductoModel } from "~/modules/Module.Compras.Levantamiento/Types/TProductoModel";
 
 const props = defineProps<{
 	codigo: string;
+	descripcion: string;
+	detalleExistencias: TProductoDetalleModel[];
 }>();
-
-const controller = LevantamientoController.getInstance();
-
-const productoVisualizado = ref<TProductoModel>(<TProductoModel>{});
-
-const productoDevuelto = await controller.getProductoEspecifico(props.codigo);
-
-if (!!productoDevuelto) {
-	productoVisualizado.value = productoDevuelto;
-}
 </script>
 
 <template>
 	<div class="flex flex-col">
-		<span><b>Codigo: </b> {{ productoVisualizado.codigo }}</span>
-		<span><b>Nombre: </b> {{ productoVisualizado.nombre }}</span>
-		<span><b>Marca: </b> {{ productoVisualizado.marca }}</span>
-		<span><b>Linea: </b> {{ productoVisualizado.linea }}</span>
+		<span><b>Codigo: </b> {{ props.codigo }}</span>
+		<span><b>Nombre: </b> {{ props.descripcion }}</span>
 	</div>
-	<TableFull :espacio-botones="true" :usar-filtrado-externo="false" :page-size="10" v-if="!!productoVisualizado.detalleExistencias" :data-recibida="productoVisualizado.detalleExistencias">
+	<TableFull :espacio-botones="true" :usar-filtrado-externo="false" :page-size="10" v-if="!!props.detalleExistencias" :data-recibida="props.detalleExistencias">
 		<template v-slot:thead="{ th }">
 			<tr style="font-size: 0.9rem" class="bg-gray-50 text-gray-700 px-4 py-3 select-none grid tr-tabla-detalles">
 				<th>UBICACION</th>

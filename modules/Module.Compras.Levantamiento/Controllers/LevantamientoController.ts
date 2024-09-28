@@ -67,6 +67,10 @@ export default class LevantamientoController {
 		await this.servicioLevantamiento.guardarProgresoProducto(producto);
 	}
 
+	async getDetalleDeProductoEnLevantamiento(producto: TLevantamientoProductoModel): Promise<void> {
+		await this.servicioLevantamiento.getDetalleDeProductoEnLevantamiento(producto);
+	}
+
 	//--------------------------- Productos
 
 	async loadDataInicialProductos(): Promise<void> {
@@ -81,26 +85,11 @@ export default class LevantamientoController {
 		await this.servicioProductos.filtrarProductos(campoFiltro);
 	}
 
-	async getDetalleProducto(producto: TProductoModel): Promise<void> {
-		await this.servicioProductos.getDetalleProducto(producto);
+	async getDetalleDeProductoEnProductos(producto: TProductoModel): Promise<void> {
+		await this.servicioProductos.getDetalleDeProductoEnProductos(producto);
 	}
 
 	actualizarEstadoProductoListado(codigo: string, estado: boolean = true): void {
 		this.servicioProductos.actualizarEstadoProductoListado(codigo, estado);
-	}
-
-	async getProductoEspecifico(codigo: string): Promise<TProductoModel | null> {
-		let productoDevuelto = this.servicioProductos.getProductoEspecifico(codigo);
-
-		//Intento para buscar el producto
-		if (!productoDevuelto) {
-			await this.servicioProductos.getDetalleProductoById(codigo);
-			productoDevuelto = this.servicioProductos.getProductoEspecifico(codigo);
-		}
-
-		if (!!productoDevuelto) {
-			return productoDevuelto;
-		}
-		return null;
 	}
 }

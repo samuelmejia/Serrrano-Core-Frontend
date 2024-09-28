@@ -23,7 +23,7 @@ type TLevantamientoProductoModel = {
 	fecha: string;
 	hora: string;
 	observaciones: string;
-	detallesInventario: TProductoDetalleModel[];
+	detalleExistencias: TProductoDetalleModel[];
 	detalles?: TProductoDetalleModel[];
 };
 

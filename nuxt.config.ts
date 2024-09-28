@@ -6,6 +6,9 @@ export default {
 	compatibilityDate: "2024-04-03",
 	pages: true,
 	typescript: "strict",
+	generate: {
+		fallback: true,
+	},
 	devtools: { enabled: false },
 	modules: ["@pinia/nuxt", "@pinia-plugin-persistedstate/nuxt", "@element-plus/nuxt", "nuxt-echarts", "@nuxtjs/tailwindcss"],
 	echarts: {

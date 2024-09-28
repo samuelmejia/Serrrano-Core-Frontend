@@ -10,9 +10,12 @@ export default class UsuarioAPI {
 
 	private convertDomainToModel(data: TUsuarioAPIDomain): TUsuarioAPIModel {
 		{
+			let tiempoExpiracion = new Date();
+			tiempoExpiracion.setSeconds(tiempoExpiracion.getSeconds() + data.token.expiraTime);
+
 			return {
 				token: data.token.token,
-				timeExpire: data.token.expiraTime,
+				timeExpire: tiempoExpiracion,
 				idUsuario: data.token.idUsuario,
 				nombre: data.usuarioTiendas[0].nombre,
 				usuarioTiendas: data.usuarioTiendas.map((tienda) => ({

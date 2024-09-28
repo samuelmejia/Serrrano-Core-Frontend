@@ -3,7 +3,10 @@ import Mensajes from "~/helpers/Mensajes";
 import UsuarioAPI from "~/modules/_Module.Info/UsuarioAPI";
 import RuntimeService from "~/services/RuntimeService";
 
-RuntimeService.getInstance(useRuntimeConfig());
+definePageMeta({
+	layout: "vacio",
+	title: "Inicio",
+});
 
 const loadingState = reactive({
 	mostrar: false,
@@ -42,7 +45,7 @@ async function iniciarSesionUsuario() {
 
 <template>
 	<div class="py-16" style="height: 100vh; display: flex; align-items: center">
-		<div class="flex bg-white rounded-lg shadow-lg overflow-hidden mx-auto max-w-sm lg:max-w-4xl">
+		<div class="border flex bg-white rounded-lg shadow-lg overflow-hidden mx-auto max-w-sm lg:max-w-4xl">
 			<div class="hidden lg:block lg:w-1/2 bg-cover">
 				<img src="/img/serrano-edificio-frontal.jpg" style="min-height: 100%; min-width: 100%; aspect-ratio: 16 / 9; object-fit: cover" />
 			</div>
