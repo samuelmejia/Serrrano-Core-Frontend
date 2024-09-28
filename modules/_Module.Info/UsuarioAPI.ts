@@ -1,47 +1,45 @@
-import Mensajes from "~/helpers/Mensajes";
 import FetchHeaders from "../_Module.API/_FetchHeaders";
 import API from "../_Module.API/API";
 import TokenAPI from "../_Module.API/TokenAPI";
-import type { TUsuarioAPIModel } from "../_Module.API/TUsuarioAPIModel";
-
-/*import FetchHeaders from "~/Modules/_Module.API/_FetchHeaders";
-import TokenAPI from "~/Modules/_Module.API/TokenAPI";
-import RuntimeService from "~/services/RuntimeService";
-import API from "../_Module.API/API";
-*/
-
-type TRespuestaAuth = {
-	idUsuario: string;
-	token: string;
-	refreshToken: string;
-	expiraTime: string;
-	msg: string;
-};
+import type { TUsuarioAPIDomain, TUsuarioAPIModel } from "../_Module.API/TUsuarioAPIModel";
 
 export default class UsuarioAPI {
 	constructor() {
 		TokenAPI.getInstance();
 	}
 
+	private convertDomainToModel(data: TUsuarioAPIDomain): TUsuarioAPIModel {
+		{
+			return {
+				token: data.token.token,
+				timeExpire: data.token.expiraTime,
+				idUsuario: data.token.idUsuario,
+				nombre: data.usuarioTiendas[0].nombre,
+				usuarioTiendas: data.usuarioTiendas.map((tienda) => ({
+					idAlmacen: tienda.idAlmacen,
+					nombreAlmacen: tienda.nombreAlmacen,
+				})),
+			};
+		}
+	}
+
 	async iniciarSesion(email: string, password: string): Promise<{ status: boolean; mensaje: string }> {
 		const api = new API();
-		const resData = await api.post<TRespuestaAuth>("/Auth", {
-			Correo: "test@gmail.com",
-			Password: "test",
+		const resData = await api.post<TUsuarioAPIDomain>("/Auth", {
+			Correo: email,
+			Password: password,
 		});
 
-		if (!!resData) {
-			let dataToken: TUsuarioAPIModel = {
-				token: resData.token,
-				timeExpire: 50000, //TODO: obtener el tiempo correcto
-				usuario: resData.idUsuario,
-			};
+		if (!resData) return { status: false, mensaje: "Error al iniciar sesión" };
 
-			TokenAPI.setDataToken(dataToken);
+		if (!!resData) {
+			const data = this.convertDomainToModel(resData);
+
+			TokenAPI.setDataToken(data);
 
 			return {
 				status: true,
-				mensaje: resData.msg,
+				mensaje: "Usuario autenticado!",
 			};
 		}
 

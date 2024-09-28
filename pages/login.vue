@@ -18,8 +18,12 @@ const inputLogin = ref({
 });
 
 async function iniciarSesionUsuario() {
-	if (inputLogin.value.usuario.toLowerCase() != "apineda") {
-		Mensajes.fallo("Usuario no encontrado");
+	if (inputLogin.value.usuario.length == 0) {
+		Mensajes.advertencia("El campo usuario es requerido");
+		return;
+	}
+	if (inputLogin.value.pass.length == 0) {
+		Mensajes.advertencia("El campo contraseña es requerido");
 		return;
 	}
 
@@ -54,7 +58,7 @@ async function iniciarSesionUsuario() {
 					<input
 						v-model="inputLogin.usuario"
 						class="bg-gray-200 text-gray-700 focus:outline-none focus:shadow-outline border border-gray-300 rounded py-2 px-4 block w-full appearance-none"
-						type="email"
+						type="text"
 					/>
 				</div>
 				<div class="mt-4">
@@ -66,10 +70,15 @@ async function iniciarSesionUsuario() {
 						v-model="inputLogin.pass"
 						class="bg-gray-200 text-gray-700 focus:outline-none focus:shadow-outline border border-gray-300 rounded py-2 px-4 block w-full appearance-none"
 						type="password"
+						@keyup.enter="iniciarSesionUsuario"
 					/>
 				</div>
 				<div class="mt-8">
-					<span @click="iniciarSesionUsuario" style="display: block; text-align: center" class="cursor-pointer bg-gray-700 text-white font-bold py-2 px-4 w-full rounded hover:bg-gray-600"
+					<span
+						@click="iniciarSesionUsuario"
+						@keyup.enter="iniciarSesionUsuario"
+						style="display: block; text-align: center"
+						class="cursor-pointer bg-gray-700 text-white font-bold py-2 px-4 w-full rounded hover:bg-gray-600"
 						>Ingresar</span
 					>
 				</div>

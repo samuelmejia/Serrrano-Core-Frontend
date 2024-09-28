@@ -20,19 +20,7 @@ servicio.loadData().then(() => {
 </script>
 
 <template>
-	<div>
-		<h1>Page: Inventario/Bodegas</h1>
-	</div>
-
-	<TableFull
-		:usar-filtrado-externo="false"
-		:page-size="10"
-		tam-campo-busqueda="30%"
-		:key="stampActualizacionRegistros"
-		v-if="!!servicio.getAllBodegas()"
-		:data-recibida="servicio.getAllBodegas()"
-		:filter="[{ codigo: 'string' }, { nombre: 'string' }, { codigoBarras: 'array' }, { modelo: 'string' }, { marca: 'string' }]"
-	>
+	<TableFull :usar-filtrado-externo="false" :page-size="10" :data-recibida="servicio.getAllBodegas()">
 		<template v-slot:thead="{ th }">
 			<tr class="uppercase bg-gray-50 text-gray-700 px-4 py-3 select-none grid" style="font-size: 0.9rem; grid-template-columns: 1fr 3fr 1fr 3fr">
 				<th>Cod</th>

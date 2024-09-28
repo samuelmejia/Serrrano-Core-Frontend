@@ -35,9 +35,8 @@ function cerrarSesion() {
 								<i class="group-open:rotate-180 fas fa-chevron-up"></i>
 							</summary>
 							<div class="accordion-content ml-6" style="border-left: 1px solid">
-								<NuxtLink to="/compras/productos" class="flex items-center px-4 py-1 mt-1 hover:bg-gray-200 hover-text-orange-600">Ver Productos</NuxtLink>
-								<NuxtLink to="/compras/levantamientos" class="flex items-center px-4 py-1 mt-1 hover:bg-gray-200 hover-text-orange-600">Levantamientos</NuxtLink>
-								<NuxtLink to="/compras/gestiones" class="flex items-center px-4 py-1 mt-1 hover:bg-gray-200 hover-text-orange-600">Gestiones Derivadas</NuxtLink>
+								<NuxtLink to="/levantamientos/productos" class="flex items-center px-4 py-1 mt-1 hover:bg-gray-200 hover-text-orange-600">Ver Productos</NuxtLink>
+								<NuxtLink to="/levantamientos/historico" class="flex items-center px-4 py-1 mt-1 hover:bg-gray-200 hover-text-orange-600">Historico</NuxtLink>
 							</div>
 						</details>
 					</li>
@@ -45,13 +44,12 @@ function cerrarSesion() {
 					<li>
 						<details class="group">
 							<summary class="cursor-pointer select-none flex items-center justify-between w-full px-4 py-1 mt-1 focus:outline-none hover:bg-gray-200 hover-text-orange-600">
-								<span class="flex items-center"> <i class="mr-2 fas fa-check"></i>Compras:Aprobaciones</span>
+								<span class="flex items-center"> <i class="mr-2 fas fa-check"></i>Compras:Gestiones</span>
 
 								<i class="group-open:rotate-180 fas fa-chevron-up"></i>
 							</summary>
 							<div class="accordion-content ml-6" style="border-left: 1px solid">
-								<a href="#" class="flex items-center px-4 py-1 mt-1 hover:bg-gray-200 hover-text-orange-600">Opcion 2.1</a>
-								<a href="#" class="flex items-center px-4 py-1 mt-1 hover:bg-gray-200 hover-text-orange-600">Opcion 2.2</a>
+								<NuxtLink to="/gestiones/opciones" class="flex items-center px-4 py-1 mt-1 hover:bg-gray-200 hover-text-orange-600">Opcion Opciones</NuxtLink>
 							</div>
 						</details>
 					</li>
@@ -81,8 +79,7 @@ function cerrarSesion() {
 								<i class="group-open:rotate-180 fas fa-chevron-up"></i>
 							</summary>
 							<div class="accordion-content ml-6" style="border-left: 1px solid">
-								<a href="/inventario/bodegas" class="flex items-center px-4 py-1 mt-1 hover:bg-gray-200 hover-text-orange-600">Sucursales / Bodegas</a>
-								<a href="#" class="flex items-center px-4 py-1 mt-1 hover:bg-gray-200 hover-text-orange-600">Productos</a>
+								<NuxtLink to="/inventario/bodegas" class="flex items-center px-4 py-1 mt-1 hover:bg-gray-200 hover-text-orange-600">Bodegas</NuxtLink>
 							</div>
 						</details>
 					</li>
@@ -95,7 +92,7 @@ function cerrarSesion() {
 								<i class="group-open:rotate-180 fas fa-chevron-up"></i>
 							</summary>
 							<div class="accordion-content ml-6" style="border-left: 1px solid">
-								<a href="#" class="flex items-center px-4 py-1 mt-1 hover:bg-gray-200 hover-text-orange-600">Usuarios</a>
+								<NuxtLink to="/configuracion/perfil" class="flex items-center px-4 py-1 mt-1 hover:bg-gray-200 hover-text-orange-600">Perfil</NuxtLink>
 							</div>
 						</details>
 					</li>

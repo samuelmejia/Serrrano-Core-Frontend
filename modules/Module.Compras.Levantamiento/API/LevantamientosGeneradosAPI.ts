@@ -134,6 +134,24 @@ export default class LevantamientoAPI {
 			body: [],
 		};
 	}
+	/*
+
+	async GET_AllLevantamientos(): Promise<{ estado: boolean; body: TLevantamientoDomain[] }> {
+		const api = new API();
+		const resData = await api.get<TLevantamientoDomain[]>("/Levantamiento/ftAll");
+
+		if (!!resData) {
+			return {
+				estado: true,
+				body: resData,
+			};
+		}
+
+		return {
+			estado: false,
+			body: [],
+		};
+	}*/
 
 	convertLevantamientoProductoDomainToModel(producto: TLevantamientoProductoDomain) {
 		return <TLevantamientoProductoModel>{
@@ -144,27 +162,7 @@ export default class LevantamientoAPI {
 			fecha: Fechas.Date_To_String(new Date(producto.fechaHora)),
 			hora: Fechas.Time_To_String(new Date(producto.fechaHora)),
 			observaciones: producto.observaciones,
-			detallesInventario: [],
-			detalles: [],
-		};
-	}
-
-	///----------------- Historial
-
-	async GET_GetLevantamientos(): Promise<{ estado: boolean; body: TLevantamientoActualModel[] }> {
-		const api = new API();
-		const resData = await api.get<TLevantamientoActualDomain[]>("/Levantamiento/GetAllLevantamientos");
-
-		if (!!resData) {
-			return {
-				estado: true,
-				body: resData.map((x) => this.convertLevantamientoDomainToModel(x)),
-			};
-		}
-
-		return {
-			estado: false,
-			body: [],
+			detalles: [], //TODO: agregar detalles
 		};
 	}
 }

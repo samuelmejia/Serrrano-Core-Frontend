@@ -8,6 +8,8 @@ import type { TLevantamientoProductoModel, TProductoModel } from "~/modules/Modu
 import type { TProductoDetalleModel } from "~/modules/Module.Compras.Levantamiento/Types/TProductoDetalleModel";
 import LevantamientoController from "~/modules/Module.Compras.Levantamiento/Controllers/LevantamientoController";
 import DataLevantamientoService from "~/modules/Module.Compras.Levantamiento/Services/DataLevantamientoService";
+import TokenAPI from "~/modules/_Module.API/TokenAPI";
+import type { TPermisoTiendaModel } from "~/modules/_Module.API/TUsuarioAPIModel";
 
 const controller = LevantamientoController.getInstance();
 
@@ -56,6 +58,8 @@ async function quitarDeLevantamiento(producto: TLevantamientoProductoModel, pagi
 const checkAll = ref(false);
 const indeterminate = ref(false);
 const valoresChecks = ref<CheckboxValueType[]>([]);
+const bodegasExistentes = ref<TPermisoTiendaModel[]>(TokenAPI.getPermisosTienda());
+/*
 const bodegasExistentes = [
 	{
 		value: "0101",
@@ -89,7 +93,7 @@ const bodegasExistentes = [
 		value: "0108",
 		label: "INVENTATIO EN BIP",
 	},
-];
+];*/
 
 const ejemploDetalle = [
 	{
@@ -128,7 +132,7 @@ watch(valoresChecks, (val) => {
 	if (val.length === 0) {
 		checkAll.value = false;
 		indeterminate.value = false;
-	} else if (val.length === bodegasExistentes.length) {
+	} else if (val.length === bodegasExistentes.value.length) {
 		checkAll.value = true;
 		indeterminate.value = false;
 	} else {
@@ -139,7 +143,7 @@ watch(valoresChecks, (val) => {
 const handleCheckAll = (val: CheckboxValueType) => {
 	indeterminate.value = false;
 	if (val) {
-		valoresChecks.value = bodegasExistentes.map((x) => x.value);
+		valoresChecks.value = bodegasExistentes.value.map((x) => x.idAlmacen);
 	} else {
 		valoresChecks.value = [];
 	}
@@ -164,7 +168,7 @@ function guardarProgreso() {
 	//guardar todos los productos, aunque la EndPoint sea de 1 a 1
 
 	for (let producto of dataRevision) {
-		controller.actualizarProductoLevantamiento(producto);
+		controller.guardarProgresoProducto(producto);
 	}
 }
 
@@ -196,7 +200,7 @@ const servicioData = new DataLevantamientoService();
 				<template #header>
 					<el-checkbox v-model="checkAll" :indeterminate="indeterminate" @change="handleCheckAll"> Todos </el-checkbox>
 				</template>
-				<el-option v-for="item in bodegasExistentes" :key="item.value" :class="{ 'custom-selected': valoresChecks.includes(item.value) }" :label="item.label" :value="item.value" />
+				<el-option v-for="item in bodegasExistentes" :key="item.idAlmacen" :class="{ 'custom-selected': valoresChecks.includes(item.idAlmacen) }" :label="item.nombreAlmacen" :value="item.idAlmacen" />
 			</el-select>
 		</div>
 		<div class="flex select-none justify-between py-2">

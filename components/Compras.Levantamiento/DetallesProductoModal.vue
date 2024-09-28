@@ -11,7 +11,7 @@ const controller = LevantamientoController.getInstance();
 
 const productoVisualizado = ref<TProductoModel>(<TProductoModel>{});
 
-const productoDevuelto = controller.getProductoEspecifico(props.codigo);
+const productoDevuelto = await controller.getProductoEspecifico(props.codigo);
 
 if (!!productoDevuelto) {
 	productoVisualizado.value = productoDevuelto;
@@ -25,7 +25,7 @@ if (!!productoDevuelto) {
 		<span><b>Marca: </b> {{ productoVisualizado.marca }}</span>
 		<span><b>Linea: </b> {{ productoVisualizado.linea }}</span>
 	</div>
-	<TableFull :usar-filtrado-externo="false" :page-size="10" v-if="!!productoVisualizado.detalleExistencias" :data-recibida="productoVisualizado.detalleExistencias">
+	<TableFull :espacio-botones="true" :usar-filtrado-externo="false" :page-size="10" v-if="!!productoVisualizado.detalleExistencias" :data-recibida="productoVisualizado.detalleExistencias">
 		<template v-slot:thead="{ th }">
 			<tr style="font-size: 0.9rem" class="bg-gray-50 text-gray-700 px-4 py-3 select-none grid tr-tabla-detalles">
 				<th>UBICACION</th>

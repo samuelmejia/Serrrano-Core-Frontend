@@ -2,32 +2,25 @@ import Mensajes from "~/helpers/Mensajes";
 import type { TLevantamientoProductoModel, TProductoModel } from "../Types/TProductoModel";
 import LevantamientoAPI from "../API/LevantamientoAPI";
 import ProductosAPI from "../API/ProductosAPI";
-import Fechas from "~/helpers/Fechas";
 import type { TLevantamientoActualModel } from "../Types/TLevantamientoActualModel";
-import { LevantamientoStore } from "../API/LevantamientoStore";
-
-// import { LevantamientoProductosStore } from "../API/LevantamientoProductosStore";
-
-import type { TLevantamientoProductoDomain } from "../_Data/TipoDomain";
+import TokenAPI from "~/modules/_Module.API/TokenAPI";
 
 export default class LevantamientoService {
 	api;
 	data: Map<string, TLevantamientoProductoModel>;
 	infoLevantamiento = <TLevantamientoActualModel>{};
-	storeLevantamiento: any;
-	// storeLevantamientoProductos: any;
 
 	constructor() {
 		this.api = new LevantamientoAPI();
 		this.data = new Map<string, TLevantamientoProductoModel>();
 	}
 
-	async loadData(): Promise<void> {
+	async loadProductosLevantamiento(): Promise<void> {
 		const respuesta = await this.api.GET_GetProductosLevantamiento(this.infoLevantamiento.id);
 
 		console.log("respuesta de Load", respuesta);
 
-		if (respuesta.estado && !!respuesta.body && respuesta.body.length > 0) {
+		if (respuesta.estado && respuesta.body.length > 0) {
 			for (let p of <TLevantamientoProductoModel[]>respuesta.body) {
 				this.data.set(p.codigo, p);
 			}
@@ -43,22 +36,18 @@ export default class LevantamientoService {
 		return respuesta.estado;
 	}
 
-	async loadProductosLevantamiento(): Promise<void> {
-		//pendiente, se debe extraer de la BD cuando ya existe el carrito lleno
-	}
-
-	async iniciarLevantamiento(): Promise<void> {
+	async iniciarLevantamiento(): Promise<boolean> {
 		console.log("LevantamientoService -> iniciarLevantamiento");
 
-		/*
-			const respuesta = await this.api.POST_IniciarLevantamiento();
-			if (respuesta.estado) Mensajes.exito(respuesta.mensaje);
-			else Mensajes.fallo(respuesta.mensaje);
-			*/
-		this.storeLevantamiento.set(this.infoLevantamiento);
+		const respuesta = await this.api.POST_IniciarLevantamiento();
+		if (respuesta.estado) Mensajes.exito(respuesta.mensaje);
+
+		return respuesta.estado;
 	}
 
 	convertirEnTipoLevantamiento(idLevantamiento: number, producto: TProductoModel): TLevantamientoProductoModel {
+		const tiendas = TokenAPI.getPermisosTienda();
+
 		return {
 			id: 0,
 			idLevantamiento,
@@ -67,6 +56,7 @@ export default class LevantamientoService {
 			fecha: "",
 			hora: "",
 			observaciones: "",
+			detallesInventario: [],
 			detalles: [],
 		};
 	}
@@ -76,9 +66,13 @@ export default class LevantamientoService {
 
 		if (!!producto && !this.data.has(producto.codigo)) {
 			console.log("agregarProductoLevantamiento:: ", this.infoLevantamiento.id, productoLevantamiento.codigo);
-			const respuesta = await this.api.POST_AgregarProductoLevantamiento(this.infoLevantamiento.id, productoLevantamiento);
+			let respuesta = await this.api.POST_AgregarProductoLevantamiento(this.infoLevantamiento.id, productoLevantamiento);
 
 			if (respuesta.estado) {
+				if (productoLevantamiento.detallesInventario.length === 0) {
+					await this.getDetalleProducto(productoLevantamiento);
+				}
+
 				this.data.set(productoLevantamiento.codigo, productoLevantamiento);
 				this.getDetalleProducto(productoLevantamiento);
 			}
@@ -124,8 +118,8 @@ export default class LevantamientoService {
 		return null;
 	}
 
-	async actualizarProductoLevantamiento(producto: TLevantamientoProductoModel): Promise<void> {
-		console.log("LevantamientoService -> actualizarProductoLevantamiento");
+	async guardarProgresoProducto(producto: TLevantamientoProductoModel): Promise<void> {
+		console.log("LevantamientoService -> guardarProgresoProducto");
 		//pendiente
 	}
 }

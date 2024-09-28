@@ -1,4 +1,4 @@
-import type { TProductoModel } from "../Types/TProductoModel";
+import type { TLevantamientoProductoModel, TProductoModel } from "../Types/TProductoModel";
 import type { TProductoDetalleModel } from "../Types/TProductoDetalleModel";
 import API from "~/modules/_Module.API/API";
 import type { TDetalleProductoDomain, TProductoDomain } from "../_Data/TipoDomain";
@@ -84,5 +84,23 @@ export default class ProductosAPI {
 		}
 
 		return [];
+	}
+
+	async POST_guardarProgresoLevantamiento(idLevantamiento: number, producto: TLevantamientoProductoModel): Promise<void> {
+		const productoFormateado = {
+			idLevantamiento,
+			codigo: producto.codigo,
+			observaciones: producto.observaciones,
+			detalles: producto.detalles?.map((x) => {
+				return {
+					idTienda: x.codigoTienda,
+					encontrado: x.encontrado,
+					estado: x.solicitar,
+				};
+			}),
+		};
+
+		const api = new API();
+		await api.post<string>("/Levantamiento/ProgresoLevantamiento", productoFormateado);
 	}
 }

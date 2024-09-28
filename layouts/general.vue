@@ -50,6 +50,7 @@ TokenAPI.getInstance();
 			crossorigin="anonymous"
 			referrerpolicy="no-referrer"
 		/>
+		<Link rel="icon" type="image/png" href="/icon-page.png" />
 	</Head>
 
 	<div class="flex h-screen bg-gray-100">
@@ -66,7 +67,7 @@ TokenAPI.getInstance();
 		</div>
 
 		<div class="min-h-full flex flex-col flex-1 overflow-y-auto" @click="handleClickOutside">
-			<div class="flex items-center justify-between h-16 bg-white border-b border-gray-100 shadow-lg">
+			<div style="min-height: 4rem" class="flex items-center justify-between h-16 bg-white border-b border-gray-100 shadow-lg">
 				<div class="flex items-center px-4">
 					<button class="text-gray-500 focus:outline-none focus:text-gray-700 lg:hidden" @click.stop="toggleSidebar"><i style="font-size: 2rem; color: #374151" class="fas fa-bars"></i></button>
 				</div>
@@ -76,13 +77,14 @@ TokenAPI.getInstance();
 					<span style="font-size: 0.8rem">{{ route.meta.subTitle }}</span>
 				</div>
 				<div class="flex items-center pr-4" style="column-gap: 5px">
-					<span> {{ TokenAPI.getUsuario() }} </span>
+					<span> {{ TokenAPI.getNombreUsuario() }} </span>
 					<img src="/img/serrano-icon.png" style="height: 40px" />
 				</div>
 			</div>
 			<div class="p-4 flex-1 flex flex-col">
 				<main class="flex-1 p-4 bg-white shadow-lg" style="border-radius: 5px">
 					<ElConfigProvider :locale="es">
+						<br />
 						<slot />
 					</ElConfigProvider>
 				</main>

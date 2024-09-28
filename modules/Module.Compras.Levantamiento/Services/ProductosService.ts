@@ -45,6 +45,17 @@ export default class ProductosService {
 		}
 	}
 
+	//se utiliza si es que no se encuentra ningun producto en la lista, pero se quiere traer de la API
+	async getDetalleProductoById(codigo: string): Promise<void> {
+		await this.filtrarProductos(codigo);
+
+		const productoDevuelto = this.getProductoEspecifico(codigo);
+
+		if (!!productoDevuelto && productoDevuelto.detalleExistencias.length === 0) {
+			await this.getDetalleProducto(productoDevuelto);
+		}
+	}
+
 	async getDetalleProducto(producto: TProductoModel): Promise<void> {
 		const detalles = await this.api.GET_DetalleProducto(producto.codigo);
 

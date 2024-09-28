@@ -10,6 +10,7 @@ const props = defineProps<{
 	tamCampoBusqueda?: string;
 	defaultPage?: number | null;
 	defaultCampoBusqueda?: string | null;
+	espacioBotones?: boolean;
 }>();
 
 const emit = defineEmits(["emitFiltradoExterno", "emitFiltradoLocal"]);
@@ -139,7 +140,7 @@ onMounted(() => {
 
 <template>
 	<article>
-		<div class="grid" style="grid-template-columns: 60% 40%; min-height: 3rem">
+		<div class="grid" style="grid-template-columns: 60% 40%; min-height: 3rem" v-if="!!espacioBotones">
 			<div v-if="!!props.filter" class="flex items-center">
 				<el-input
 					ref="refInputB"

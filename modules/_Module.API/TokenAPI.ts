@@ -1,4 +1,4 @@
-import type { TUsuarioAPIModel } from "./TUsuarioAPIModel";
+import type { TPermisoTiendaModel, TUsuarioAPIModel } from "./TUsuarioAPIModel";
 import FetchHeaders from "./_FetchHeaders";
 
 type TDataUsuario = {
@@ -53,24 +53,27 @@ export default class TokenAPI {
 		const dataJSON = window.localStorage.getItem(TokenAPI.direccionLS) || "{}";
 		const dataToken = <TUsuarioAPIModel>JSON.parse(dataJSON);
 
-		return <string>dataToken.usuario;
+		return <string>dataToken.idUsuario;
+	}
+
+	static getNombreUsuario(): string {
+		const dataJSON = window.localStorage.getItem(TokenAPI.direccionLS) || "{}";
+		const dataToken = <TUsuarioAPIModel>JSON.parse(dataJSON);
+
+		return <string>dataToken.nombre;
+	}
+
+	static getPermisosTienda(): TPermisoTiendaModel[] {
+		const dataJSON = window.localStorage.getItem(TokenAPI.direccionLS) || "{}";
+		const dataToken = <TUsuarioAPIModel>JSON.parse(dataJSON);
+
+		return dataToken.usuarioTiendas;
 	}
 
 	static getMinutosRestantes(): number {
 		const dataJSON = window.localStorage.getItem(TokenAPI.direccionLS) || "{}";
 		const dataToken = <TUsuarioAPIModel>JSON.parse(dataJSON);
 
-		const fechaActual = new Date();
-		const fechaExpiracion = new Date(dataToken.timeExpire);
-
-		console.log("fechaActual", fechaActual);
-		console.log("dataToken.timeExpire", dataToken.timeExpire);
-		console.log("fechaExpiracion", fechaExpiracion);
-
-		const diferencia = fechaExpiracion.getTime() - fechaActual.getTime();
-
-		if (isNaN(diferencia)) return 0;
-
-		return Math.floor(diferencia / (1000 * 60));
+		return dataToken.timeExpire; // minutos
 	}
 }

@@ -22,6 +22,10 @@ export default class LevantamientoController {
 		return LevantamientoController.instance;
 	}
 
+	public static destroyInstance(): void {
+		LevantamientoController.instance = null;
+	}
+
 	//--------------------------- Levantamiento
 
 	async estatusLevantamiento(): Promise<boolean> {
@@ -29,11 +33,11 @@ export default class LevantamientoController {
 	}
 
 	async loadProductosLevantamiento(): Promise<void> {
-		await this.servicioLevantamiento.loadData();
+		await this.servicioLevantamiento.loadProductosLevantamiento();
 	}
 
-	async iniciarLevantamiento(): Promise<void> {
-		await this.servicioLevantamiento.iniciarLevantamiento();
+	async iniciarLevantamiento(): Promise<boolean> {
+		return this.servicioLevantamiento.iniciarLevantamiento();
 	}
 
 	async agregarProductoLevantamiento(producto: TProductoModel): Promise<void> {
@@ -59,8 +63,8 @@ export default class LevantamientoController {
 		return this.servicioLevantamiento.getCantidadProductosAgregados();
 	}
 
-	async actualizarProductoLevantamiento(producto: TLevantamientoProductoModel): Promise<void> {
-		await this.servicioLevantamiento.actualizarProductoLevantamiento(producto);
+	async guardarProgresoProducto(producto: TLevantamientoProductoModel): Promise<void> {
+		await this.servicioLevantamiento.guardarProgresoProducto(producto);
 	}
 
 	//--------------------------- Productos
@@ -81,12 +85,19 @@ export default class LevantamientoController {
 		await this.servicioProductos.getDetalleProducto(producto);
 	}
 
-	actualizarEstadoProductoListado(codigo: string): void {
-		this.servicioProductos.actualizarEstadoProductoListado(codigo, true);
+	actualizarEstadoProductoListado(codigo: string, estado: boolean = true): void {
+		this.servicioProductos.actualizarEstadoProductoListado(codigo, estado);
 	}
 
-	getProductoEspecifico(codigo: string): TProductoModel | null {
-		const productoDevuelto = this.servicioProductos.getProductoEspecifico(codigo);
+	async getProductoEspecifico(codigo: string): Promise<TProductoModel | null> {
+		let productoDevuelto = this.servicioProductos.getProductoEspecifico(codigo);
+
+		//Intento para buscar el producto
+		if (!productoDevuelto) {
+			await this.servicioProductos.getDetalleProductoById(codigo);
+			productoDevuelto = this.servicioProductos.getProductoEspecifico(codigo);
+		}
+
 		if (!!productoDevuelto) {
 			return productoDevuelto;
 		}

@@ -23,19 +23,8 @@ type TLevantamientoProductoModel = {
 	fecha: string;
 	hora: string;
 	observaciones: string;
+	detallesInventario: TProductoDetalleModel[];
 	detalles?: TProductoDetalleModel[];
 };
 
-type TLevantamientoDomain = {
-	id: number;
-	fechaCreacion: string;
-	horaCreacion: string;
-	usuarioResponsable: string;
-	ipAddress: string;
-	area: string;
-	pasillo: string;
-	observaciones: string;
-	idEstado: string;
-};
-
-export type { TProductoModel, TLevantamientoProductoModel, TLevantamientoDomain };
+export type { TProductoModel, TLevantamientoProductoModel };

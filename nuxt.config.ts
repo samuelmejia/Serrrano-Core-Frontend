@@ -2,6 +2,7 @@
 
 export default {
 	ssr: false,
+	target: "static",
 	compatibilityDate: "2024-04-03",
 	pages: true,
 	typescript: "strict",
