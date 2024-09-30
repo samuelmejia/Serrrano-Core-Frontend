@@ -5,11 +5,12 @@ import { Delete } from "@element-plus/icons-vue";
 import type { CheckboxValueType } from "element-plus";
 
 import type { TLevantamientoProductoModel, TProductoModel } from "~/modules/Module.Compras.Levantamiento/Types/TProductoModel";
-import type { TProductoDetalleModel } from "~/modules/Module.Compras.Levantamiento/Types/TProductoDetalleModel";
+import type { TProductoDetalleExistenciasModel, TProductoDetalleModel } from "~/modules/Module.Compras.Levantamiento/Types/TProductoDetalleExistenciasModel";
 import LevantamientoController from "~/modules/Module.Compras.Levantamiento/Controllers/LevantamientoController";
 import DataLevantamientoService from "~/modules/Module.Compras.Levantamiento/Services/DataLevantamientoService";
 import TokenAPI from "~/modules/_Module.API/TokenAPI";
 import type { TPermisoTiendaModel } from "~/modules/_Module.API/TUsuarioAPIModel";
+import Mensajes from "~/helpers/Mensajes";
 
 const controller = LevantamientoController.getInstance();
 
@@ -35,9 +36,13 @@ const stampActualizacionExistencias = ref(0);
 
 const productoVisualizado = ref<TLevantamientoProductoModel | null>(dataRevision[0]);
 
+function contruirDetallesEncontrado(producto: TLevantamientoProductoModel) {
+	const almacenesPermitidos = TokenAPI.getPermisosTienda().map((x) => x.idAlmacen);
+	controller.servicioLevantamiento.construirDetalleProducto(producto, almacenesPermitidos);
+}
+
 function cambiarProductoMostrado(producto: TLevantamientoProductoModel) {
 	productoVisualizado.value = producto;
-
 	stampActualizacionDetalles.value++;
 }
 
@@ -61,6 +66,7 @@ const checkAll = ref(false);
 const indeterminate = ref(false);
 const valoresChecks = ref<CheckboxValueType[]>([]);
 const bodegasExistentes = ref<TPermisoTiendaModel[]>(TokenAPI.getPermisosTienda());
+
 /*
 const bodegasExistentes = [
 	{
@@ -97,39 +103,6 @@ const bodegasExistentes = [
 	},
 ];*/
 
-const ejemploDetalle = [
-	{
-		codigo: "",
-		codigoTienda: "0101",
-		nombreTienda: "(1) TIENDA PRINCIPAL",
-		reservado: 0,
-		enTransito: 0,
-		confirmado: 0,
-		existencia: 0,
-		disponible: 0,
-		stockMinimo: 0,
-		stockMaximo: 0,
-		movimiento: 0,
-		encontrado: 0,
-		solicitar: "",
-	},
-	{
-		codigo: "",
-		codigoTienda: "0102",
-		nombreTienda: "(2) BODEGA PRINCIPAL",
-		reservado: 0,
-		enTransito: 0,
-		confirmado: 0,
-		existencia: 0,
-		disponible: 0,
-		stockMinimo: 0,
-		stockMaximo: 0,
-		movimiento: 0,
-		encontrado: 0,
-		solicitar: "",
-	},
-];
-
 watch(valoresChecks, (val) => {
 	if (val.length === 0) {
 		checkAll.value = false;
@@ -153,75 +126,80 @@ const handleCheckAll = (val: CheckboxValueType) => {
 
 onMounted(() => {
 	handleCheckAll(true);
+
+	console.log("dataRevision[0]", dataRevision[0]);
+
+	controller.getDetalleDeProductoEnLevantamiento(dataRevision[0]).then(() => {
+		productoVisualizado.value = dataRevision[0];
+		stampActualizacionDetalles.value++;
+	});
+
+	for (let producto of dataRevision) {
+		controller.getDetalleDeProductoEnLevantamiento(producto);
+	}
 });
 
 function finalizarRevision() {
-	alert("Pedir informacion extra, cambiar estado en BD de carrito y mandar a compras");
+	mostrarPanelFinalizar.value = true;
 }
 
-function finalizarAnular() {
-	alert("Pedir confirmacion y luego borrar de la BD el progreso");
+async function completarProcesoFinalizar() {
+	//Mensajes.fallo(`Funcion no implementada: ${controller.servicioLevantamiento.infoLevantamiento.id} ${JSON.stringify(dataFinalizar.value)}`);
+	const idLevantamiento = controller.servicioLevantamiento.infoLevantamiento.id;
+	const dF = dataFinalizar.value;
+
+	const respuesta = await controller.servicioLevantamiento.finalizarLevantamiento(idLevantamiento, dF.area, dF.pasillo, dF.observaciones);
+	if (respuesta) {
+		setTimeout(() => {
+			location.reload();
+		}, 1000);
+	} else {
+		Mensajes.fallo("Error al finalizar el levantamiento");
+	}
 }
 
 function guardarProgreso() {
-	console.log("guardar..");
-	alert(`Guardar productos hasta el momento`);
-
-	//guardar todos los productos, aunque la EndPoint sea de 1 a 1
-
-	for (let producto of dataRevision) {
-		controller.guardarProgresoProducto(producto);
-	}
+	controller.servicioLevantamiento.guardarProgresoProductosTodos();
 }
 
 const mostrarDetallesModal = ref(false);
 const productoMostrarDetalle = ref(<TLevantamientoProductoModel>{});
 
 function verDetalleProducto(producto: TLevantamientoProductoModel) {
-	console.log("ver detalle", producto);
 	productoMostrarDetalle.value = producto;
 	stampActualizacionExistencias.value++;
 
-	if (producto.detalleExistencias.length == 0) {
-		controller.getDetalleDeProductoEnLevantamiento(producto).then(() => {
-			console.log("cargo de manera asincrona");
-			const resProducto = controller.servicioLevantamiento.getProductoUnico(producto.codigo);
-			if (!!resProducto) {
-				productoMostrarDetalle.value = resProducto;
-				stampActualizacionExistencias.value++;
-			}
-		});
-	}
-
 	mostrarDetallesModal.value = true;
 }
-
-const tecladoFormulas = ref(false);
 
 function ingresoProducto(detalle: TProductoDetalleModel, origen: string) {
 	if (!!productoVisualizado.value && !!productoVisualizado.value.detalles) {
 		const index = productoVisualizado.value.detalles.findIndex((x) => x.codigoTienda == detalle.codigoTienda);
 		productoVisualizado.value.detalles[index] = detalle;
+		controller.servicioLevantamiento.actualizarRegistroDetalleDeProducto(productoVisualizado.value, detalle);
 	}
 }
 
 const servicioData = new DataLevantamientoService();
+
+const mostrarPanelFinalizar = ref(false);
+const dataFinalizar = ref({
+	area: "",
+	pasillo: "",
+	observaciones: "",
+});
 </script>
 
 <template>
 	<div style="border-top: 1px solid gray" class="mb-4"></div>
 	<div class="grid" style="grid-template-columns: 54% 45%; column-gap: 1%">
-		<div class="flex items-center space-x-2">
-			<span>Selecccionar Bodegas:</span>
-			<el-select v-model="valoresChecks" multiple clearable collapse-tags placeholder="Bodegas trabajadas" popper-class="custom-header" :max-collapse-tags="1" style="width: 240px">
-				<template #header>
-					<el-checkbox v-model="checkAll" :indeterminate="indeterminate" @change="handleCheckAll"> Todos </el-checkbox>
-				</template>
-				<el-option v-for="item in bodegasExistentes" :key="item.idAlmacen" :class="{ 'custom-selected': valoresChecks.includes(item.idAlmacen) }" :label="item.nombreAlmacen" :value="item.idAlmacen" />
-			</el-select>
-		</div>
+		<div class="flex items-center space-x-2"></div>
 		<div class="flex select-none justify-between py-2">
-			<div class="flex items-end py-1"></div>
+			<div class="flex items-end py-1">
+				<div @click="guardarProgreso" class="cursor-pointer select-none flex justify-start space-x-2 text-white bg-[#67c23a] px-4 hover:bg-[#7d4]">
+					<span class="menu-hover my-1 py-1"> Guardar Progreso </span>
+				</div>
+			</div>
 			<div class="group relative cursor-pointer py-1">
 				<div class="flex items-center justify-between space-x-2 text-white bg-orange-400 px-4 hover:bg-orange-300">
 					<span class="menu-hover my-1 py-1"> Opciones </span>
@@ -231,7 +209,9 @@ const servicioData = new DataLevantamientoService();
 				<div class="invisible absolute z-50 flex w-full flex-col bg-gray-100 text-gray-800 shadow-xl group-hover:visible">
 					<a @click="finalizarRevision" class="block border-b border-gray-100 px-2 py-1 text-gray-500 hover:text-white hover:bg-orange-500">Finalizar</a>
 
+					<!--
 					<a @click="finalizarAnular" class="block border-b border-gray-100 px-2 py-1 text-gray-500 hover:text-white hover:bg-orange-500">Anular Todo</a>
+					-->
 				</div>
 			</div>
 		</div>
@@ -278,18 +258,12 @@ const servicioData = new DataLevantamientoService();
 			</template>
 		</TableFull>
 		<div>
-			<TableFull :espacio-botones="true" :key="stampActualizacionDetalles" :usar-filtrado-externo="false" :page-size="10" :data-recibida="ejemploDetalle">
-				<template #botones>
-					<div @click="guardarProgreso" class="cursor-pointer select-none flex justify-start space-x-2 text-white bg-[#67c23a] px-4 hover:bg-[#7d4]">
-						<span class="menu-hover my-1 py-1"> Guardar Progreso </span>
-					</div>
-				</template>
+			<TableFull :espacio-botones="true" :key="stampActualizacionDetalles" :usar-filtrado-externo="false" :page-size="10" v-if="!!productoVisualizado" :data-recibida="productoVisualizado.detalles">
+				<template #botones> </template>
 				<template #thead="{ th }">
 					<tr style="font-size: 0.9rem" class="bg-gray-50 text-gray-700 py-2 select-none grid tr-tabla-detalles">
 						<th>UBICACION</th>
-						<th>EXIST.</th>
 						<th>DISP.</th>
-						<th>MOV.</th>
 						<th>ENCONT.</th>
 						<th>SOLICITADO</th>
 					</tr>
@@ -305,9 +279,7 @@ const servicioData = new DataLevantamientoService();
 						<td class="text-left pl-2">
 							{{ row.nombreTienda }}
 						</td>
-						<td class="text-center">{{ row.existencia }}</td>
 						<td class="text-center">{{ row.disponible }}</td>
-						<td class="text-center">{{ row.movimiento | 0 }}</td>
 						<td class="px-2">
 							<input
 								type="text"
@@ -358,6 +330,26 @@ const servicioData = new DataLevantamientoService();
 			/>
 		</div>
 	</el-dialog>
+
+	<el-dialog v-model="mostrarPanelFinalizar" title="Información de Finalización" width="60%">
+		<div style="border-top: 1px solid gray" class="mt-0 pt-4">
+			<div class="mb-6">
+				<label class="block text-gray-800 font-bold mb-2"> Area </label>
+				<input v-model="dataFinalizar.area" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" type="text" />
+			</div>
+			<div class="mb-6">
+				<label class="block text-gray-800 font-bold mb-2" for="pasillo"> Pasillo </label>
+				<input v-model="dataFinalizar.pasillo" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" type="text" />
+			</div>
+			<div class="mb-6">
+				<label class="block text-gray-800 font-bold mb-2" for="email"> Observaciones </label>
+				<input v-model="dataFinalizar.observaciones" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" type="text" />
+			</div>
+			<div class="mb-6 flex justify-end">
+				<el-button type="success" @click="completarProcesoFinalizar" size="large"> Finalizar </el-button>
+			</div>
+		</div>
+	</el-dialog>
 </template>
 
 <style lang="scss">
@@ -387,7 +379,7 @@ const servicioData = new DataLevantamientoService();
 }
 
 .tr-tabla-detalles {
-	grid-template-columns: 2fr 1fr 1fr 1fr 1fr 2fr;
+	grid-template-columns: 3fr 1fr 1fr 2fr;
 }
 
 .tr-detalles_no-usar {

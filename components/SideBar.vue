@@ -11,7 +11,7 @@ function cerrarSesion() {
 			sessionStorage.clear();
 			location.href = "/";
 		}
-	}, 1000);
+	}, 500);
 }
 </script>
 

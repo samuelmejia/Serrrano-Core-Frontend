@@ -1,5 +1,5 @@
 import type { TLevantamientoProductoModel, TProductoModel } from "../Types/TProductoModel";
-import type { TProductoDetalleModel } from "../Types/TProductoDetalleModel";
+import type { TProductoDetalleExistenciasModel } from "../Types/TProductoDetalleExistenciasModel";
 import API from "~/modules/_Module.API/API";
 import type { TDetalleProductoDomain, TProductoDomain } from "../_Data/TipoDomain";
 
@@ -62,13 +62,13 @@ export default class ProductosAPI {
 		return [];
 	}
 
-	async GET_DetalleProducto(param_codigo: string): Promise<TProductoDetalleModel[]> {
+	async GET_DetalleProducto(param_codigo: string): Promise<TProductoDetalleExistenciasModel[]> {
 		const api = new API();
 		const resData = await api.get<TDetalleProductoDomain[]>("/Producto/ExistenciaProducto", { busqueda: param_codigo });
 
 		if (!!resData) {
 			return resData.map((x: TDetalleProductoDomain) => {
-				return <TProductoDetalleModel>{
+				return <TProductoDetalleExistenciasModel>{
 					codigo: x.id,
 					codigoTienda: x.tndID,
 					nombreTienda: x.tndNombre,

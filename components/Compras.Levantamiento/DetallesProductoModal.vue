@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import type { TProductoDetalleModel } from "~/modules/Module.Compras.Levantamiento/Types/TProductoDetalleModel";
+import type { TProductoDetalleExistenciasModel } from "~/modules/Module.Compras.Levantamiento/Types/TProductoDetalleExistenciasModel";
 
 const props = defineProps<{
 	codigo: string;
 	descripcion: string;
-	detalleExistencias: TProductoDetalleModel[];
+	detalleExistencias: TProductoDetalleExistenciasModel[];
 }>();
 </script>
 
@@ -27,7 +27,7 @@ const props = defineProps<{
 			</tr>
 		</template>
 		<template v-slot:tbody="{ dataMostrada }">
-			<tr :key="row.codigoTienda" class="grid py-1 tr-tabla-detalles hover:bg-gray-200" style="font-size: 0.9rem" v-for="row of <TProductoDetalleModel[]>dataMostrada">
+			<tr :key="row.codigoTienda" class="grid py-1 tr-tabla-detalles hover:bg-gray-200" style="font-size: 0.9rem" v-for="row of <TProductoDetalleExistenciasModel[]>dataMostrada">
 				<td class="text-left">
 					{{ row.nombreTienda }}
 				</td>

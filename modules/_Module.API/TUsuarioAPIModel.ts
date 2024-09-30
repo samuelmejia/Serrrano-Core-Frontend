@@ -22,6 +22,7 @@ type TPermisoTiendaModel = {
 
 type TUsuarioAPIModel = {
 	token: string;
+	refreshToken: string;
 	timeExpire: Date;
 	idUsuario: string;
 	nombre: string;

@@ -1,12 +1,10 @@
 <script setup lang="ts">
-import Detalles from "~/components/Compras.Levantamiento/DetallesProductoModal.vue";
-import ProductosSection from "../Productos/partials/CarritoSection.vue";
-
 import TableFull from "~/components/TableFull.vue";
-import ComprasLevantamientoController from "~/modules/Module.Compras.Levantamiento/Controllers/LevantamientoController";
 import type { TProductoModel } from "~/modules/Module.Compras.Levantamiento/Types/TProductoModel";
 import SpinnerLoading from "~/components/SpinnerLoading.vue";
-import LevantamientoController from "~/modules/Module.Compras.Levantamiento/Controllers/LevantamientoController";
+import type { TLevantamientoActualModel } from "~/modules/Module.Compras.Levantamiento/Types/TLevantamientoActualModel";
+import LevantamientoHistorialService from "~/modules/Module.Compras.Levantamiento/Services/LevantamientoHistorialService";
+import CarritoHistoricoSection from "./partials/CarritoHistoricoSection.vue";
 
 definePageMeta({
 	layout: "general",
@@ -23,50 +21,21 @@ const stampActualizacionTabla = ref(0);
 const stampActualizacionRegistros = ref(0);
 const stampActualizacionAgregados = ref(0);
 
-const controller = LevantamientoController.getInstance();
+const serviceHistorico = new LevantamientoHistorialService();
 
-controller.servicioProductos.loadData().then(() => {
-	console.log("data cargada:: ", controller.servicioProductos.getAllProductos().length);
+serviceHistorico.loadLevantamientos().then(() => {
 	stampActualizacionTabla.value++;
 	stampActualizacionRegistros.value++;
 });
 
-async function cambiarEstadoAgregado(producto: TProductoModel) {
-	await controller.agregarProductoLevantamiento(producto);
-
-	stampActualizacionRegistros.value++;
-	stampActualizacionAgregados.value++;
+async function mostrarDetallesLevantamiento(levantamiento: TLevantamientoActualModel) {
+	mostrarRevisadosModal.value = true;
+	infoLevantamiento.value = levantamiento;
 }
 
-async function mostrarDetalleLevantamiento(producto: TProductoModel) {
-	loadingState.mostrar = true;
-	loadingState.texto = "Cargando Detalle";
-	productoMostrarDetalle.value = producto;
-	mostrarDetallesModal.value = true;
-	loadingState.mostrar = false;
-}
-
+const infoLevantamiento = ref<TLevantamientoActualModel | null>(null);
 const mostrarRevisadosModal = ref(false);
 const mostrarDetallesModal = ref(false);
-
-const productoMostrarDetalle = ref(<TProductoModel>{});
-
-let defaultCampoBusqueda = "";
-async function llamarFiltradoExterno(valueBusqueda: string) {
-	if (valueBusqueda.length < 2) {
-		alert("La busqueda debe tener al menos 2 caracteres");
-		return;
-	}
-
-	await controller.servicioProductos.filtrarProductos(valueBusqueda);
-	defaultCampoBusqueda = valueBusqueda;
-	stampActualizacionTabla.value++;
-}
-
-function quitarDeLevantamiento() {
-	actualizarListaAgregados();
-	stampActualizacionAgregados.value++;
-}
 
 function actualizarListaAgregados() {
 	stampActualizacionRegistros.value++;
@@ -79,43 +48,44 @@ watch(mostrarRevisadosModal, (newValue) => {
 
 <template>
 	<TableFull
-		:usar-filtrado-externo="true"
+		:usar-filtrado-externo="false"
 		:page-size="10"
-		@emit-Filtrado-externo="llamarFiltradoExterno"
 		:key="stampActualizacionTabla"
 		tam-campo-busqueda="30%"
-		:default-campo-busqueda="defaultCampoBusqueda"
-		v-if="!!controller.servicioProductos.getAllProductos()"
-		:data-recibida="controller.servicioProductos.getAllProductos()"
+		v-if="!!serviceHistorico.getListLevantamientos()"
+		:data-recibida="serviceHistorico.getListLevantamientos()"
 		:filter="[{ codigo: 'string' }, { nombre: 'string' }, { modelo: 'string' }, { marca: 'string' }]"
 	>
 		<template v-slot:thead="{ th }">
 			<tr class="tr-levantamientos-previos bg-gray-100 text-gray-700 px-4 py-3 select-none grid">
-				<th>CODIGO</th>
-				<th>DETALLES</th>
 				<th>CREADOR</th>
-				<th>CANTIDAD</th>
+				<th>OBSERVACIONES</th>
 				<th>CREACION</th>
-				<th>ULT. MODIF.</th>
-				<th>ESTADO</th>
+				<th>CIERRE</th>
+				<th>AREA</th>
+				<th>PASILLO</th>
 				<th>VER</th>
 			</tr>
 		</template>
 		<template v-slot:tbody="{ dataMostrada }">
-			<tr class="grid py-1 tr-levantamientos-previos" :key="row.codigo" v-for="row of <TProductoModel[]>dataMostrada">
-				<td class="text-center">{{ row.codigo }}</td>
-				<td class="text-left">Comentario o descripcion de la ubicacion y objetivo del levantamiento</td>
-				<td class="text-center">Usuario</td>
-				<td class="text-center">{{ Math.ceil(Math.random() * 10) }}</td>
-				<td class="text-right pr-6" style="text-wrap: nowrap">{{ row.fechaUltimaVenta }}</td>
-				<td class="text-right pr-6" style="text-wrap: nowrap">{{ row.fechaUltimaVenta }}</td>
-				<td>Pendiente</td>
-				<td class="text-center" :key="stampActualizacionRegistros" @click="mostrarDetalleLevantamiento(row)">
+			<tr class="grid py-1 tr-levantamientos-previos" :key="row.id" v-for="row of <TLevantamientoActualModel[]>dataMostrada">
+				<td class="text-center">{{ row.usuarioResponsable }}</td>
+				<td class="text-left">{{ row.observaciones }}</td>
+				<td class="text-center">{{ row.fechaCreacion }}</td>
+				<td class="text-right pr-6" style="text-wrap: nowrap">{{ !row.fechaCierre ? "En Proceso" : row.fechaCierre }}</td>
+				<td class="text-right pr-6" style="text-wrap: nowrap">{{ row.area }}</td>
+				<td class="text-right pr-6" style="text-wrap: nowrap">{{ row.pasillo }}</td>
+
+				<td class="text-center" :key="stampActualizacionRegistros" @click="mostrarDetallesLevantamiento(row)">
 					<el-button type="warning"><i class="fas fa-eye"></i></el-button>
 				</td>
 			</tr>
 		</template>
 	</TableFull>
+
+	<el-dialog style="min-height: 90vh; margin: 5vh auto" v-model="mostrarRevisadosModal" title="Historico de Levantamiento" width="90%">
+		<CarritoHistoricoSection :stamp-reactivo="stampActualizacionAgregados" v-if="!!infoLevantamiento" :info-levantamiento="infoLevantamiento" />
+	</el-dialog>
 
 	<el-dialog v-model="mostrarDetallesModal" title="Detalle de Levantamiento" width="80%">
 		<div style="border-top: 1px solid gray" class="mt-0 pt-4">Informacion de Levantamiento</div>
@@ -127,6 +97,6 @@ watch(mostrarRevisadosModal, (newValue) => {
 <style lang="scss" scoped>
 .tr-levantamientos-previos {
 	font-size: 0.9rem;
-	grid-template-columns: 1fr 5fr 2fr 1fr 1fr 1fr 1fr 1fr;
+	grid-template-columns: 2fr 5fr 1fr 1fr 1fr 1fr 1fr;
 }
 </style>

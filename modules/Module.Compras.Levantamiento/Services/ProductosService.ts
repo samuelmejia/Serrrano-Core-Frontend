@@ -1,7 +1,7 @@
 import Mensajes from "~/helpers/Mensajes";
 import ProductosLevantamientoAPI from "../API/ProductosAPI";
 import type { TProductoModel } from "../Types/TProductoModel";
-import type { TProductoDetalleModel } from "../Types/TProductoDetalleModel";
+import type { TProductoDetalleExistenciasModel } from "../Types/TProductoDetalleExistenciasModel";
 
 export default class ProductosService {
 	api;

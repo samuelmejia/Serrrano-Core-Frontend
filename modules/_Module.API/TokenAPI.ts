@@ -49,6 +49,13 @@ export default class TokenAPI {
 		return dataToken.token || "";
 	}
 
+	static getRefreshToken(): string {
+		const dataJSON = window.localStorage.getItem(TokenAPI.direccionLS) || "{}";
+		const dataToken = <TUsuarioAPIModel>JSON.parse(dataJSON);
+
+		return dataToken.refreshToken || "";
+	}
+
 	static getUsuario(): string {
 		const dataJSON = window.localStorage.getItem(TokenAPI.direccionLS) || "{}";
 		const dataToken = <TUsuarioAPIModel>JSON.parse(dataJSON);

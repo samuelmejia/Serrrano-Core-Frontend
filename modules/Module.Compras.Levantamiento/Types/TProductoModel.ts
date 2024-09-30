@@ -1,4 +1,4 @@
-import type { TProductoDetalleModel } from "./TProductoDetalleModel";
+import type { TProductoDetalleExistenciasModel, TProductoDetalleModel } from "./TProductoDetalleExistenciasModel";
 
 type TProductoModel = {
 	codigo: string;
@@ -12,7 +12,7 @@ type TProductoModel = {
 	fechaUltimaCompra: string;
 	fechaUltimaVenta: string;
 	estadoAgregado: boolean;
-	detalleExistencias: TProductoDetalleModel[];
+	detalleExistencias: TProductoDetalleExistenciasModel[];
 };
 
 type TLevantamientoProductoModel = {
@@ -23,8 +23,8 @@ type TLevantamientoProductoModel = {
 	fecha: string;
 	hora: string;
 	observaciones: string;
-	detalleExistencias: TProductoDetalleModel[];
-	detalles?: TProductoDetalleModel[];
+	detalleExistencias: TProductoDetalleExistenciasModel[];
+	detalles: TProductoDetalleModel[];
 };
 
 export type { TProductoModel, TLevantamientoProductoModel };

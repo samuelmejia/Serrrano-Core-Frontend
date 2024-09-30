@@ -15,6 +15,7 @@ export default class UsuarioAPI {
 
 			return {
 				token: data.token.token,
+				refreshToken: data.token.refreshToken,
 				timeExpire: tiempoExpiracion,
 				idUsuario: data.token.idUsuario,
 				nombre: data.usuarioTiendas[0].nombre,
@@ -29,7 +30,7 @@ export default class UsuarioAPI {
 	async iniciarSesion(email: string, password: string): Promise<{ status: boolean; mensaje: string }> {
 		const api = new API();
 		const resData = await api.post<TUsuarioAPIDomain>("/Auth", {
-			Correo: email,
+			Usuario: email,
 			Password: password,
 		});
 
@@ -52,7 +53,30 @@ export default class UsuarioAPI {
 		};
 	}
 
-	async solicitarRestablecerContrasena(email: string) {}
+	async refreshToken() {
+		const api = new API();
+		const resData = await api.post<TUsuarioAPIDomain>("/Auth", {
+			refresh_token: TokenAPI.getRefreshToken(),
+		});
+
+		if (!resData) return { status: false, mensaje: "Error al iniciar sesión" };
+
+		if (!!resData) {
+			const data = this.convertDomainToModel(resData);
+
+			TokenAPI.setDataToken(data);
+
+			return {
+				status: true,
+				mensaje: "Usuario autenticado!",
+			};
+		}
+
+		return {
+			status: false,
+			mensaje: "",
+		};
+	}
 
 	cerrarSesion() {
 		if (!!window) {

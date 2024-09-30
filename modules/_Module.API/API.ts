@@ -54,7 +54,7 @@ export default class API {
 		}
 	}
 
-	public async post<T>(nombreRuta: string, bodyData: any = null): Promise<T | null> {
+	public async post<T>(nombreRuta: string, bodyData: any = null, mostrarMensajeFallo: boolean = true): Promise<T | null> {
 		if (!nombreRuta || nombreRuta.length == 0) {
 			throw new Error(`La ruta ${nombreRuta} no está definida.`);
 		}
@@ -80,13 +80,17 @@ export default class API {
 			const data: T = await response.json();
 			return data;
 		} catch (error: any) {
-			Mensajes.fallo(error);
+			if (error.hasOwnProperty("message") && mostrarMensajeFallo) {
+				Mensajes.fallo(error.message);
+			} else if (mostrarMensajeFallo) {
+				Mensajes.fallo(error);
+			}
 			console.error(`ERR_POST:: en la ruta ${nombreRuta}:`, error);
 			return null;
 		}
 	}
 
-	public async patch<T>(nombreRuta: string, bodyData: any): Promise<T | null> {
+	public async put<T>(nombreRuta: string, bodyData: any): Promise<T | null> {
 		if (!nombreRuta || nombreRuta.length == 0) {
 			throw new Error(`La ruta ${nombreRuta} no está definida.`);
 		}

@@ -100,7 +100,7 @@ async function confirmarInicioLevantamiento() {
 
 		if (res == "confirm") {
 			const respuestaProceso = await controller.iniciarLevantamiento();
-			levantamientoEnProceso.value = respuestaProceso;
+			if (respuestaProceso) location.reload();
 		}
 	} catch (e: any) {}
 }
@@ -124,7 +124,7 @@ const esperaCarga = ref(true);
 
 setTimeout(() => {
 	esperaCarga.value = false;
-}, 2000);
+}, 2500);
 </script>
 
 <template>
@@ -142,6 +142,7 @@ setTimeout(() => {
 
 	<div v-loading="esperaCarga" style="min-height: 80vh">
 		<TableFull
+			:espacio-botones="true"
 			:usar-filtrado-externo="true"
 			:page-size="10"
 			@emit-filtrado-externo="llamarFiltradoExterno"
