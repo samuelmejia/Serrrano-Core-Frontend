@@ -162,7 +162,7 @@ onMounted(() => {
 				<thead>
 					<slot name="thead" :th="{ setSort, mostrarLabel }"></slot>
 				</thead>
-				<tbody class="divide-y divide-gray-100" v-if="dataMostrada.length > 0" style="display: block; min-height: 25rem">
+				<tbody class="divide-y divide-gray-100" v-if="dataMostrada.length > 0" style="display: block; min-height: 20rem">
 					<slot name="tbody" :dataMostrada="dataMostrada" :paginaActual="currentPage"></slot>
 				</tbody>
 				<tfoot class="divide-y divide-gray-100"></tfoot>

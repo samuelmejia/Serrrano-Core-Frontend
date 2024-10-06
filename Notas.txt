@@ -1,0 +1,54 @@
+
+Tablas
+---------------------
+
+Pedido --Copia de Levantamiento
+(
+    Id
+    FechaCreacion
+    FechaCierre
+    Descripcion
+    UsuarioResponsable
+    IPAddress
+    FechaEntrega 
+    Observaciones
+    IDEstado 
+)
+
+PedidoProducto
+(
+    ID
+    CodProducto
+    Descripcion
+    Marca
+    FechaHora
+    FechaEntrega
+    Cantidad
+    Observaciones
+    IdPedido
+)
+
+
+
+API
+---------------------
+
+
+*1.GET: /pedidos*   filters de QueryParams: {descripcion, idPedido, idEstado}
+-- Lista de pedidos sin sus productos
+
+*2.GET: /pedidos/get/{idPedido}*
+-- Pedido en especifico con sus codProductos
+
+*3.POST: /pedidos/copiarLevantamiento/{idLevantamiento}*
+-- Crear un nuevo Pedido a partir de la tabla levantamiento y levantamientoProducto
+
+*4.POST: /pedidos*     body: {idPedido, descripcion, fechaEntrega}
+-- Si idPedido=-1 se crear uno nuevo, si idPedido>0 edita el pedido con dicha descripcion
+
+*5.POST: /pedidos/agregar*      body: {idPedido, codProducto, cantidad, descripcion, marca, observaciones}
+-- Agregar un producto a un pedido abierto, considerar que el producto puede ya existir y solo se actualiza los datos
+
+*6.DELETE: /pedidos/eliminar*   body: {idPedido, codProducto} 
+
+

@@ -5,7 +5,7 @@ import RuntimeService from "~/services/RuntimeService";
 
 definePageMeta({
 	layout: "vacio",
-	title: "Inicio",
+	title: "Iniciar Sesión",
 });
 
 const loadingState = reactive({
@@ -41,6 +41,10 @@ async function iniciarSesionUsuario() {
 		loadingState.mostrar = false;
 	}
 }
+
+function olvideContrasena() {
+	Mensajes.advertencia("Comuníquese con el personal de IT para recuperar su contraseña.", "Contraseña");
+}
 </script>
 
 <template>
@@ -67,7 +71,7 @@ async function iniciarSesionUsuario() {
 				<div class="mt-4">
 					<div class="flex justify-between">
 						<label class="block text-gray-700 text-sm font-bold mb-2">Contraseña</label>
-						<a href="#" tabindex="-1" class="text-xs text-gray-500">Olvidé mi contraseña</a>
+						<span @click="olvideContrasena" class="text-xs text-gray-500 underline cursor-pointer">Olvidé mi contraseña</span>
 					</div>
 					<input
 						v-model="inputLogin.pass"

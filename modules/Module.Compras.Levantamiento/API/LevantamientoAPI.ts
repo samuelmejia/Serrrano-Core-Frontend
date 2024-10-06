@@ -1,5 +1,5 @@
 import API from "~/modules/_Module.API/API";
-import type { TDetalleProductoDomain, TLevantamientoActualDomain, TLevantamientoProductoDomain, TProductoDetalleDomain } from "../_Data/TipoDomain";
+import type { TDetalleProductoDomain, TLevantamientoActualDomain, TLevantamientoProductoDomain, TProductoDetalleDomain } from "../_Data/TiposLevantamiento";
 import type { TLevantamientoProductoModel } from "../Types/TProductoModel";
 import type { TLevantamientoActualModel } from "../Types/TLevantamientoActualModel";
 import Fechas from "~/helpers/Fechas";
@@ -147,6 +147,7 @@ export default class LevantamientoAPI {
 			idLevantamiento: producto.idLevantamiento,
 			codigo: producto.codProducto,
 			descripcion: producto.descripcion,
+			marca: producto.marca || "",
 			fecha: Fechas.Date_To_String(new Date(producto.fechaHora)),
 			hora: Fechas.Time_To_String(new Date(producto.fechaHora)),
 			observaciones: producto.observaciones,

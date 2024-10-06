@@ -51,6 +51,7 @@ TokenAPI.getInstance();
 			referrerpolicy="no-referrer"
 		/>
 		<Link rel="icon" type="image/png" href="/icon-page.png" />
+		<title>{{ route.meta.title }} - Serrano Industrial</title>
 	</Head>
 
 	<div class="flex h-screen bg-gray-100">

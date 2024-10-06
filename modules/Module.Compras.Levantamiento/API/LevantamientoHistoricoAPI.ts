@@ -1,5 +1,5 @@
 import API from "~/modules/_Module.API/API";
-import type { TLevantamientoActualDomain, TLevantamientoProductoDomain, TProductoDetalleDomain } from "../_Data/TipoDomain";
+import type { TLevantamientoActualDomain, TLevantamientoProductoDomain, TProductoDetalleDomain } from "../_Data/TiposLevantamiento";
 import type { TLevantamientoProductoModel } from "../Types/TProductoModel";
 import type { TLevantamientoActualModel } from "../Types/TLevantamientoActualModel";
 import Fechas from "~/helpers/Fechas";
@@ -11,7 +11,16 @@ export default class LevantamientoHistoricoAPI {
 	async GET_GetAllLevantamientos(): Promise<TLevantamientoActualModel[]> {
 		const api = new API();
 		const resData = await api.get<TLevantamientoActualDomain[]>("/Levantamiento/ListaLevantamientos?id=3");
-		//TODO: Cambiar luego
+
+		if (!!resData) {
+			return resData.map(this.convertLevantamientoDomainToModel);
+		}
+		return [];
+	}
+
+	async GET_GetAllLevantamientosFiltrados(idLevantamiento: number): Promise<TLevantamientoActualModel[]> {
+		const api = new API();
+		const resData = await api.get<TLevantamientoActualDomain[]>(`/Levantamiento/ListaLevantamientos?id=${idLevantamiento}`);
 
 		if (!!resData) {
 			return resData.map(this.convertLevantamientoDomainToModel);
@@ -64,6 +73,7 @@ export default class LevantamientoHistoricoAPI {
 			idLevantamiento: producto.idLevantamiento,
 			codigo: producto.codProducto,
 			descripcion: producto.descripcion,
+			marca: producto.marca || "",
 			fecha: Fechas.Date_To_String(new Date(producto.fechaHora)),
 			hora: Fechas.Time_To_String(new Date(producto.fechaHora)),
 			observaciones: producto.observaciones,
@@ -78,6 +88,40 @@ export default class LevantamientoHistoricoAPI {
 					solicitar: x.idEstado,
 				};
 			}),
+		};
+	}
+
+	async POST_ActualizarLevantamiento(body: any): Promise<{ estado: boolean; mensaje: string }> {
+		const api = new API();
+		const resData = await api.put<string>("/Levantamiento/PULevantamiento", body);
+
+		if (!!resData) {
+			return {
+				estado: true,
+				mensaje: resData,
+			};
+		}
+
+		return {
+			estado: false,
+			mensaje: "Error al finalizar el levantamiento",
+		};
+	}
+
+	async POST_copiarLevantamientoToPedido(idLevantamiento: number): Promise<{ estado: boolean; mensaje: string }> {
+		const api = new API();
+		const resData = await api.post<{ message: string }>("/pedidos/copiarLevantamiento", { idLevantamiento });
+
+		if (!!resData) {
+			return {
+				estado: true,
+				mensaje: resData.message,
+			};
+		}
+
+		return {
+			estado: false,
+			mensaje: "Error al generar la copia",
 		};
 	}
 }

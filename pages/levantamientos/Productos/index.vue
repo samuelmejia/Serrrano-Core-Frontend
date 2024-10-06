@@ -9,9 +9,12 @@ import type { TLevantamientoProductoModel, TProductoModel } from "~/modules/Modu
 import SpinnerLoading from "~/components/SpinnerLoading.vue";
 import Mensajes from "~/helpers/Mensajes";
 
+import { useWindowSize } from "@vueuse/core";
+const { width, height } = useWindowSize();
+
 definePageMeta({
 	layout: "general",
-	title: "Listado de Productos",
+	title: "Productos",
 	subTitle: "Revisa el inventario para seleccionar los productos que necesitas",
 });
 
@@ -125,6 +128,13 @@ const esperaCarga = ref(true);
 setTimeout(() => {
 	esperaCarga.value = false;
 }, 2500);
+
+watch(
+	() => width.value,
+	(newValue: number) => {
+		console.log("width", newValue);
+	}
+);
 </script>
 
 <template>
@@ -147,7 +157,7 @@ setTimeout(() => {
 			:page-size="10"
 			@emit-filtrado-externo="llamarFiltradoExterno"
 			:key="stampActualizacionTabla"
-			tam-campo-busqueda="30%"
+			:tam-campo-busqueda="width <= 900 ? '50%' : '30%'"
 			:default-campo-busqueda="defaultCampoBusqueda"
 			v-if="!!controller.getAllProductos()"
 			:data-recibida="controller.getAllProductos()"
@@ -158,7 +168,7 @@ setTimeout(() => {
 					<th>CODIGO</th>
 					<th>NOMBRE</th>
 					<th>MARCA</th>
-					<th>CATEGORIA</th>
+					<th v-if="width >= 900">CATEGORIA</th>
 					<th class="cursor-pointer" @click="th.setSort({ fechaUltimaVenta: 'date' })" v-html="th.mostrarLabel({ fechaUltimaVenta: 'ULTIMA V.' })"></th>
 					<th class="cursor-pointer" @click="th.setSort({ stockTotal: 'number' })" v-html="th.mostrarLabel({ stockTotal: 'STOCK T.' })"></th>
 					<th>DETALLE</th>
@@ -176,11 +186,11 @@ setTimeout(() => {
 					<td class="text-center">{{ row.codigo }}</td>
 					<td class="text-left">
 						<el-tooltip class="box-item" effect="dark" :content="row.nombre" placement="top-start">
-							{{ Texto.limitarTexto(row.nombre, 50) }}
+							{{ Texto.limitarTexto(row.nombre, width >= 900 ? 50 : 35) }}
 						</el-tooltip>
 					</td>
 					<td class="text-center">{{ row.modelo }}</td>
-					<td class="text-left">
+					<td v-if="width >= 900" class="text-left">
 						<el-tooltip class="box-item" effect="dark" :content="row.categoria" placement="top-start">
 							{{ Texto.limitarTexto(row.categoria, 15) }}
 						</el-tooltip>
@@ -188,22 +198,22 @@ setTimeout(() => {
 					<td class="text-right pr-6" style="text-wrap: nowrap">{{ row.fechaUltimaVenta }}</td>
 					<td class="text-right pr-6">{{ Numeros.convertirDecimal(row.stockTotal, 1) }}</td>
 					<td class="text-center">
-						<el-button type="success" @click="mostrarDetalleProducto(row)" style="width: min-content"><i class="fas fa-eye"></i></el-button>
+						<el-button type="success" :size="width <= 900 ? 'small' : ''" @click="mostrarDetalleProducto(row)" style="width: min-content"><i class="fas fa-eye"></i></el-button>
 					</td>
 					<td v-if="levantamientoEnProceso" class="text-center" :key="stampActualizacionAgregados">
-						<el-button v-if="!row.estadoAgregado" @click="cambiarEstadoAgregado(row)" type="primary"><i class="fas fa-plus-square"></i></el-button>
-						<el-button v-if="row.estadoAgregado" type="warning"><i class="fas fa-check-square"></i></el-button>
+						<el-button v-if="!row.estadoAgregado" :size="width <= 900 ? 'small' : ''" @click="cambiarEstadoAgregado(row)" type="primary"><i class="fas fa-plus-square"></i></el-button>
+						<el-button v-if="row.estadoAgregado" :size="width <= 900 ? 'small' : ''" type="warning"><i class="fas fa-check-square"></i></el-button>
 					</td>
 				</tr>
 			</template>
 		</TableFull>
 	</div>
 
-	<el-dialog style="min-height: 90vh; margin: 5vh auto" v-model="mostrarRevisadosModal" title="Productos en Proceso de Revisión" width="90%">
+	<el-dialog style="min-height: 90vh; margin: 5vh auto" v-model="mostrarRevisadosModal" title="Productos en Proceso de Revisión" :width="width <= 900 ? '90%' : '80%'">
 		<CarritoSection v-if="controller.getCantidadProductosAgregadosLevantamiento() > 0" :stamp-reactivo="stampActualizacionAgregados" @emit-producto-quitado-levantamiento="quitarDeLevantamiento" />
 	</el-dialog>
 
-	<el-dialog v-model="mostrarDetallesProductoModal" title="Detalle de Producto" width="80%">
+	<el-dialog v-model="mostrarDetallesProductoModal" title="Detalle de Producto" :width="width <= 900 ? '90%' : '80%'">
 		<div style="border-top: 1px solid gray" class="mt-0 pt-4">
 			<DetallesProductoModal
 				:key="stampActualizacionExistencias"
@@ -225,5 +235,17 @@ setTimeout(() => {
 
 .tr-registro-no-levantamiento {
 	grid-template-columns: 1fr 5fr 2fr 2fr 1fr 1fr 1fr;
+}
+
+@media screen and (max-width: 900px) {
+	.tr-registro-en-levantamiento {
+		grid-template-columns: 1.25fr 5fr 1.5fr 1.5fr 1fr 1fr 1fr;
+		font-size: 0.8rem !important;
+	}
+
+	.tr-registro-no-levantamiento {
+		grid-template-columns: 1.25fr 5fr 2fr 1fr 1fr 1fr;
+		font-size: 0.8rem !important;
+	}
 }
 </style>

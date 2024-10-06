@@ -7,10 +7,17 @@ import type { CheckboxValueType } from "element-plus";
 import type { TLevantamientoProductoModel, TProductoModel } from "~/modules/Module.Compras.Levantamiento/Types/TProductoModel";
 import type { TProductoDetalleExistenciasModel, TProductoDetalleModel } from "~/modules/Module.Compras.Levantamiento/Types/TProductoDetalleExistenciasModel";
 import LevantamientoController from "~/modules/Module.Compras.Levantamiento/Controllers/LevantamientoController";
-import DataLevantamientoService from "~/modules/Module.Compras.Levantamiento/Services/DataLevantamientoService";
 import TokenAPI from "~/modules/_Module.API/TokenAPI";
 import type { TPermisoTiendaModel } from "~/modules/_Module.API/TUsuarioAPIModel";
 import Mensajes from "~/helpers/Mensajes";
+
+import { EstadoSolicitarStore } from "~/modules/Module.Compras.Levantamiento/API/EstadoSolicitarStore";
+
+import { useWindowSize } from "@vueuse/core";
+
+const { width, height } = useWindowSize();
+const storeEstadoSolicitar = EstadoSolicitarStore();
+storeEstadoSolicitar.load();
 
 const controller = LevantamientoController.getInstance();
 
@@ -180,8 +187,6 @@ function ingresoProducto(detalle: TProductoDetalleModel, origen: string) {
 	}
 }
 
-const servicioData = new DataLevantamientoService();
-
 const mostrarPanelFinalizar = ref(false);
 const dataFinalizar = ref({
 	area: "",
@@ -216,7 +221,7 @@ const dataFinalizar = ref({
 			</div>
 		</div>
 	</div>
-	<div style="grid-template-columns: 54% 45%; column-gap: 1%" class="grid">
+	<div class="grid grid-paneles-carrito">
 		<TableFull
 			:espacio-botones="true"
 			:key="props.stampReactivo"
@@ -293,7 +298,7 @@ const dataFinalizar = ref({
 						</td>
 						<td class="px-2">
 							<select v-model="row.solicitar" @change="ingresoProducto(row, 'solicitar')" class="bg-white border py-1 pl-1 rounded" :disabled="!valoresChecks.includes(row.codigoTienda)">
-								<template v-for="estado of servicioData.getEstadosProductoLevantamiento()">
+								<template v-for="estado of storeEstadoSolicitar.get">
 									<option :value="estado.id">{{ estado.descripcion }}</option>
 								</template>
 							</select>
@@ -374,6 +379,18 @@ const dataFinalizar = ref({
 </style>
 
 <style lang="css" scoped>
+.grid-paneles-carrito {
+	grid-template-columns: 54% 45%;
+	column-gap: 1%;
+}
+
+@media screen and (max-width: 900px) {
+	.grid-paneles-carrito {
+		grid-template-columns: 100%;
+		row-gap: 1%;
+	}
+}
+
 .tr-tabla-revision {
 	grid-template-columns: 1fr 5fr 1fr 1fr;
 }

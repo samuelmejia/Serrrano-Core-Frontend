@@ -29,6 +29,10 @@ export default class LevantamientoHistorialService {
 		return this.dataLevantamientos;
 	}
 
+	getListLevantamientoFiltrado(idEstado: number): Promise<TLevantamientoActualModel[]> {
+		return this.api.GET_GetAllLevantamientosFiltrados(idEstado);
+	}
+
 	async loadInfoLevantamiento(idLevantamiento: number): Promise<void> {
 		const encontrado = this.dataLevantamientos.find((x) => x.id === idLevantamiento);
 
@@ -56,6 +60,7 @@ export default class LevantamientoHistorialService {
 			idLevantamiento,
 			codigo: producto.codigo,
 			descripcion: producto.nombre,
+			marca: producto.marca || "",
 			fecha: "",
 			hora: "",
 			observaciones: "",
@@ -79,5 +84,31 @@ export default class LevantamientoHistorialService {
 			return encontrado;
 		}
 		return null;
+	}
+
+	async actualizarLevantamiento(idLevantamiento: number, area: string, pasillo: string, observaciones: string, idEstado: number): Promise<boolean> {
+		const body = {
+			id: idLevantamiento,
+			area: area,
+			pasillo: pasillo,
+			observaciones: observaciones,
+			estado: idEstado,
+		};
+
+		const respuesta = await this.api.POST_ActualizarLevantamiento(body);
+		if (respuesta.estado) {
+			Mensajes.exito("Levantamiento actualizado.");
+			this.data.clear();
+			this.infoLevantamiento = <TLevantamientoActualModel>{};
+		}
+		return respuesta.estado;
+	}
+
+	async copiarLevantamientoToPedido(idLevantamiento: number): Promise<boolean> {
+		const respuesta = await this.api.POST_copiarLevantamientoToPedido(idLevantamiento);
+		if (respuesta.estado) {
+			Mensajes.exito("Copia generada.");
+		}
+		return respuesta.estado;
 	}
 }

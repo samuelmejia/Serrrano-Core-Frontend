@@ -36,7 +36,7 @@ function cerrarSesion() {
 							</summary>
 							<div class="accordion-content ml-6" style="border-left: 1px solid">
 								<NuxtLink to="/levantamientos/productos" class="flex items-center px-4 py-1 mt-1 hover:bg-gray-200 hover-text-orange-600">Ver Productos</NuxtLink>
-								<NuxtLink to="/levantamientos/historico" class="flex items-center px-4 py-1 mt-1 hover:bg-gray-200 hover-text-orange-600">Historico</NuxtLink>
+								<NuxtLink to="/levantamientos/historico" class="flex items-center px-4 py-1 mt-1 hover:bg-gray-200 hover-text-orange-600">Histórico</NuxtLink>
 							</div>
 						</details>
 					</li>
@@ -49,7 +49,8 @@ function cerrarSesion() {
 								<i class="group-open:rotate-180 fas fa-chevron-up"></i>
 							</summary>
 							<div class="accordion-content ml-6" style="border-left: 1px solid">
-								<NuxtLink to="/gestiones/opciones" class="flex items-center px-4 py-1 mt-1 hover:bg-gray-200 hover-text-orange-600">Opcion Opciones</NuxtLink>
+								<NuxtLink to="/gestiones/pedidos" class="flex items-center px-4 py-1 mt-1 hover:bg-gray-200 hover-text-orange-600">Pedidos</NuxtLink>
+								<NuxtLink to="/gestiones/opciones" class="flex items-center px-4 py-1 mt-1 hover:bg-gray-200 hover-text-orange-600">Opcion Gestiones</NuxtLink>
 							</div>
 						</details>
 					</li>

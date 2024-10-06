@@ -2,6 +2,7 @@ import FetchHeaders from "../_Module.API/_FetchHeaders";
 import API from "../_Module.API/API";
 import TokenAPI from "../_Module.API/TokenAPI";
 import type { TUsuarioAPIDomain, TUsuarioAPIModel } from "../_Module.API/TUsuarioAPIModel";
+import { hash } from "spark-md5";
 
 export default class UsuarioAPI {
 	constructor() {
@@ -31,7 +32,7 @@ export default class UsuarioAPI {
 		const api = new API();
 		const resData = await api.post<TUsuarioAPIDomain>("/Auth", {
 			Usuario: email,
-			Password: password,
+			Password: hash(password),
 		});
 
 		if (!resData) return { status: false, mensaje: "Error al iniciar sesión" };

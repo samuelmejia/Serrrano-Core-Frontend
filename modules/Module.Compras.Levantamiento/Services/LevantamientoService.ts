@@ -51,6 +51,7 @@ export default class LevantamientoService {
 			idLevantamiento,
 			codigo: producto.codigo,
 			descripcion: producto.nombre,
+			marca: producto.marca || "",
 			fecha: "",
 			hora: "",
 			observaciones: "",

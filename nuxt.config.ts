@@ -17,7 +17,8 @@ export default {
 	},
 	runtimeConfig: {
 		public: {
-			BASE_URL: process.env.BASE_URL,
+			BASE_URL_PUBLICA: process.env.BASE_URL_PUBLICA,
+			BASE_URL_INTERNA: process.env.BASE_URL_INTERNA,
 		},
 	},
 	tailwindcss: {

@@ -1,7 +1,7 @@
 import type { TLevantamientoProductoModel, TProductoModel } from "../Types/TProductoModel";
 import type { TProductoDetalleExistenciasModel } from "../Types/TProductoDetalleExistenciasModel";
 import API from "~/modules/_Module.API/API";
-import type { TDetalleProductoDomain, TProductoDomain } from "../_Data/TipoDomain";
+import type { TDetalleProductoDomain, TProductoDomain } from "../_Data/TiposLevantamiento";
 
 export default class ProductosAPI {
 	constructor() {}

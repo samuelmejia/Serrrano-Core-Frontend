@@ -20,6 +20,7 @@ type TLevantamientoProductoModel = {
 	idLevantamiento: number;
 	codigo: string;
 	descripcion: string;
+	marca: string;
 	fecha: string;
 	hora: string;
 	observaciones: string;
