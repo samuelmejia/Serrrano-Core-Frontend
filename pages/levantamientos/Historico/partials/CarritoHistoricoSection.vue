@@ -10,6 +10,11 @@ import type { TLevantamientoActualModel } from "~/modules/Module.Compras.Levanta
 import { EstadoSolicitarStore } from "~/modules/Module.Compras.Levantamiento/API/EstadoSolicitarStore";
 
 import { useWindowSize } from "@vueuse/core";
+import PedidosService from "~/modules/Module.Compras.Gestiones/services/PedidosService";
+import type { TPedidoModel, TPedidoProductoModel } from "~/modules/Module.Compras.Gestiones/_data/TiposPedidos";
+import Texto from "~/helpers/Texto";
+import Mensajes from "~/helpers/Mensajes";
+import Fechas from "~/helpers/Fechas";
 const { width, height } = useWindowSize();
 const storeEstadoSolicitar = EstadoSolicitarStore();
 storeEstadoSolicitar.load();
@@ -24,16 +29,22 @@ const emit = defineEmits(["actualizar-lista"]);
 //VARIABLES REACTIVAS
 const stampReactivo = ref(0);
 const stampActualizacionDetalles = ref(0);
-const stampActualizacionExistencias = ref(0);
 
+const servicioPedidos = new PedidosService();
 const servicioHistorico = new LevantamientoHistorialService();
 
+const chkTrabajarPedidos = ref(false);
+const listPedidosAbiertos = ref<TPedidoModel[]>([]);
 let dataRevision = <TLevantamientoProductoModel[]>[];
 
 servicioHistorico.loadProductosLevantamiento(props.infoLevantamiento.id).then(() => {
 	dataRevision = servicioHistorico.getListProductosAgregados();
 	console.log("dataRevision", dataRevision);
 	stampReactivo.value++;
+});
+
+servicioPedidos.getListPedidosFiltrado("", 9).then((data) => {
+	listPedidosAbiertos.value = data;
 });
 
 const productoVisualizado = ref<TLevantamientoProductoModel | null>(dataRevision[0]);
@@ -63,6 +74,24 @@ watch(valoresChecks, (val) => {
 });
 
 const mostrarCopiaPedidoModal = ref(false);
+const mostrarEnviarProductoToPedidoModal = ref(false);
+
+const productoMandar = ref<TLevantamientoProductoModel | null>(null);
+const pedidoActualTrabajado = ref<string>(""); //string porque se utiliza en select
+const infoPedidoMostrar = ref<TPedidoModel | null>(null);
+const cantidadMandar = ref<number>(0);
+
+function mandarProductoToPedido(producto: TLevantamientoProductoModel) {
+	if (pedidoActualTrabajado.value == "0" || pedidoActualTrabajado.value == "") {
+		Mensajes.fallo("Debe seleccionar un pedido para mandar el producto");
+		return;
+	}
+
+	productoMandar.value = producto;
+	infoPedidoMostrar.value = listPedidosAbiertos.value.find((x) => x.id == +pedidoActualTrabajado.value) ?? null;
+	cantidadMandar.value = 0;
+	mostrarEnviarProductoToPedidoModal.value = true;
+}
 
 type TDataEstado = {
 	id: string;
@@ -83,13 +112,40 @@ async function cambiarEstado() {
 	const inf = props.infoLevantamiento;
 	const respuesta = await servicioHistorico.actualizarLevantamiento(inf.id, inf.area, inf.pasillo, inf.observaciones, +estadoPorModificar.value);
 
-	mostrarEstadoLevantamientoModal.value = false;
-	emit("actualizar-lista");
+	if (respuesta) {
+		mostrarEstadoLevantamientoModal.value = false;
+		emit("actualizar-lista");
+	}
 }
 
 async function generarCopiadoLevantamientoToPedido() {
-	const respues = await servicioHistorico.copiarLevantamientoToPedido(props.infoLevantamiento.id);
+	await servicioPedidos.copiarLevantamientoToPedido(props.infoLevantamiento.id);
 	emit("actualizar-lista");
+}
+
+async function enviarProductoToPedido() {
+	const producto = productoMandar.value;
+	const pedido = infoPedidoMostrar.value;
+
+	if (!producto || !pedido) {
+		Mensajes.fallo("No se ha seleccionado un producto o pedido");
+		return;
+	}
+
+	let productoPedido: TPedidoProductoModel = {
+		id: producto.id,
+		codProducto: producto.codigo,
+		descripcion: producto.descripcion,
+		marca: producto.marca,
+		fecha: Fechas.Date_To_String(new Date()),
+		hora: Fechas.Time_To_String(new Date()),
+		fechaEntrega: "2024-12-31",
+		cantidad: cantidadMandar.value,
+		observaciones: producto.observaciones,
+		idPedido: pedido.id,
+	};
+	await servicioPedidos.guardarProductoDePedido(productoPedido, "Producto agregado a Pedido.");
+	mostrarEnviarProductoToPedidoModal.value = false;
 }
 </script>
 
@@ -125,17 +181,29 @@ async function generarCopiadoLevantamientoToPedido() {
 				<input
 					type="text"
 					:value="props.infoLevantamiento.pasillo"
-					class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded focus:ring-cyan-600 focus:border-cyan-600 block w-full px-2 py-1"
+					class="text-center shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded focus:ring-cyan-600 focus:border-cyan-600 block w-full px-2 py-1"
 				/>
 			</div>
 		</div>
-		<div>
-			<label for="product-name" class="text-sm font-medium text-gray-900 my-1 gap-1 flex items-center">
-				<input type="checkbox" class="border" />
-				<span>Pedidos</span>
-			</label>
-			<select class="bg-blue-100 py-1 px-2 border rounded">
-				<option>Seleccionar Pedido</option>
+		<div v-if="props.infoLevantamiento.estado != 'DECLINADO'">
+			<div class="text-sm font-medium text-gray-900 mb-1 flex gap-x-4">
+				<label for="pedido-trabajar" class="text-sm font-medium text-gray-900 flex items-center">
+					<input type="checkbox" id="pedido-trabajar" v-model="chkTrabajarPedidos" class="border" />
+					<span class="select-none">Trabajar con Pedidos</span>
+				</label>
+				<div class="flex items-center">
+					<el-tooltip class="box-item" effect="dark" content="Click para generar una copia de todo el Levantamiento hacia Pedido" placement="top">
+						<span :disabled="!chkTrabajarPedidos" @click="chkTrabajarPedidos ? (mostrarCopiaPedidoModal = true) : ''"
+							><i class="far fa-clipboard" :class="!chkTrabajarPedidos ? 'text-gray-200' : 'text-gray-900 hover:text-gray-500'"></i
+						></span>
+					</el-tooltip>
+				</div>
+			</div>
+			<select class="bg-blue-100 py-1 mb-1 px-1 border rounded" v-model="pedidoActualTrabajado" :disabled="!chkTrabajarPedidos">
+				<option value="">----</option>
+				<template v-for="pedido of listPedidosAbiertos">
+					<option :value="pedido.id">{{ Texto.limitarTexto(pedido.descripcion, 30) }}</option>
+				</template>
 			</select>
 		</div>
 	</div>
@@ -153,17 +221,17 @@ async function generarCopiadoLevantamientoToPedido() {
 				:filter="[{ descripcion: 'string' }]"
 			>
 				<template v-slot:thead="{ th }">
-					<tr style="font-size: 0.9rem" class="bg-gray-50 text-gray-700 px-2 py-2 select-none grid tr-tabla-revision">
+					<tr style="font-size: 0.9rem" class="bg-gray-50 text-gray-700 px-2 py-2 select-none grid" :class="chkTrabajarPedidos ? 'tr-tabla-revision' : 'tr-tabla-revision-compacta'">
 						<th>CODIGO</th>
 						<th>NOMBRE</th>
 						<th>MARCA</th>
-						<th>MANDAR</th>
+						<th v-if="chkTrabajarPedidos">MANDAR</th>
 					</tr>
 				</template>
 				<template v-slot:tbody="{ dataMostrada, paginaActual }">
 					<tr
-						class="grid py-1 cursor-pointer hover:bg-gray-200 tr-tabla-revision"
-						:class="!!productoVisualizado && productoVisualizado.codigo == row.codigo ? 'bg-gray-100' : ''"
+						class="grid py-1 cursor-pointer hover:bg-gray-200"
+						:class="chkTrabajarPedidos ? 'tr-tabla-revision' : 'tr-tabla-revision-compacta'"
 						style="font-size: 0.9rem"
 						v-for="row of <TLevantamientoProductoModel[]>dataMostrada"
 						@click="cambiarProductoMostrado(row)"
@@ -172,9 +240,9 @@ async function generarCopiadoLevantamientoToPedido() {
 						<td class="text-left">
 							<p>{{ row.descripcion }}</p>
 						</td>
-						<td>marca.pendt</td>
-						<td class="text-center">
-							<el-button type="info" size="small" plain><i class="fas fa-paper-plane"></i></el-button>
+						<td>{{ row.marca }}</td>
+						<td v-if="chkTrabajarPedidos" class="text-center">
+							<el-button type="info" size="small" plain @click="mandarProductoToPedido(row)"><i class="fas fa-paper-plane"></i></el-button>
 						</td>
 					</tr>
 				</template>
@@ -184,12 +252,6 @@ async function generarCopiadoLevantamientoToPedido() {
 					<b>Estado Levantamiento: </b>
 					<el-tooltip class="box-item" effect="dark" content="Click para cambiar estado" placement="top">
 						<span @click="mostrarEstadoLevantamientoModal = true" class="border py-1 px-2 text-center cursor-pointer">{{ props.infoLevantamiento.estado }}</span>
-					</el-tooltip>
-				</div>
-				<div class="flex flex-col w-fit" v-if="props.infoLevantamiento.estado != 'DECLINADO'">
-					<b>Copiar a Pedido: </b>
-					<el-tooltip class="box-item" effect="dark" content="Click para generar una copia de los productos" placement="top">
-						<el-button type="info" plain @click="mostrarCopiaPedidoModal = true">Copiar</el-button>
 					</el-tooltip>
 				</div>
 			</section>
@@ -231,7 +293,7 @@ async function generarCopiadoLevantamientoToPedido() {
 
 					<div class="flex flex-col">
 						<b>Observaciones:</b>
-						<textarea v-model="productoVisualizado.observaciones" class="border w-full bg-orange-100" readonly></textarea>
+						<textarea v-model="productoVisualizado.observaciones" class="border w-full bg-yellow-100" readonly></textarea>
 					</div>
 				</div>
 			</fieldset>
@@ -249,8 +311,78 @@ async function generarCopiadoLevantamientoToPedido() {
 
 	<el-dialog v-model="mostrarCopiaPedidoModal" title="Generar Copia" :width="width >= 900 ? '30%' : '60%'">
 		<main class="flex flex-col gap-y-2 items-end">
-			<p class="w-full text-center">¿Proceder a crear una copia a partir de todos los elementos de este Levantamiento?</p>
+			<p class="w-full text-center">¿Proceder a crear una copia a partir de todos los elementos SOLICITADOS de este Levantamiento?</p>
 			<el-button class="w-min" type="success" @click="generarCopiadoLevantamientoToPedido">Aceptar</el-button>
+		</main>
+	</el-dialog>
+
+	<el-dialog v-model="mostrarEnviarProductoToPedidoModal" title="Enviar a Pedido" :width="width >= 900 ? '30%' : '60%'" top="8vh">
+		<main class="flex flex-col gap-y-2" v-if="!!infoPedidoMostrar && !!productoMandar">
+			<div class="col-span-6 sm:col-span-3">
+				<label for="product-name" class="text-sm font-medium text-gray-900 block mb-1">Descripción</label>
+				<input
+					type="text"
+					:value="infoPedidoMostrar.descripcion"
+					readonly
+					class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded focus:ring-cyan-600 focus:border-cyan-600 block w-full px-2 py-1 text-center"
+				/>
+			</div>
+			<div class="col-span-6 sm:col-span-3">
+				<label for="category" class="text-sm font-medium text-gray-900 block mb-1">Fecha Creación</label>
+				<input
+					type="text"
+					:value="infoPedidoMostrar.fechaCreacion"
+					readonly
+					class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded focus:ring-cyan-600 focus:border-cyan-600 block w-full px-2 py-1 text-center"
+				/>
+			</div>
+			<div class="col-span-6 sm:col-span-3">
+				<label for="category" class="text-sm font-medium text-gray-900 block mb-1">Responsable</label>
+				<input
+					type="text"
+					:value="infoPedidoMostrar.usuarioResponsable"
+					readonly
+					class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded focus:ring-cyan-600 focus:border-cyan-600 block w-full px-2 py-1 text-center"
+				/>
+			</div>
+			<br />
+			<br />
+			<div class="col-span-6 sm:col-span-3">
+				<label for="category" class="text-sm font-medium text-gray-900 block mb-1">Código</label>
+				<input
+					type="text"
+					:value="productoMandar.codigo"
+					readonly
+					class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded focus:ring-cyan-600 focus:border-cyan-600 block w-full px-2 py-1 text-center"
+				/>
+			</div>
+			<div class="col-span-6 sm:col-span-3">
+				<label for="category" class="text-sm font-medium text-gray-900 block mb-1">Descripción</label>
+				<input
+					type="text"
+					:value="productoMandar.descripcion"
+					readonly
+					class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded focus:ring-cyan-600 focus:border-cyan-600 block w-full px-2 py-1 text-center"
+				/>
+			</div>
+			<div class="col-span-6 sm:col-span-3">
+				<label for="category" class="text-sm font-medium text-gray-900 block mb-1">Marca</label>
+				<input
+					type="text"
+					:value="productoMandar.marca"
+					readonly
+					class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded focus:ring-cyan-600 focus:border-cyan-600 block w-full px-2 py-1 text-center"
+				/>
+			</div>
+			<div class="grid items-end" style="grid-template-columns: 50% 50%">
+				<div>
+					<label for="category" class="text-sm font-medium text-gray-900 block mb-1">Cantidad</label>
+					<input type="text" v-model="cantidadMandar" class="shadow-sm border border-gray-300 sm:text-sm rounded focus:ring-cyan-600 focus:border-cyan-600 block w-full px-2 py-1 text-center" />
+				</div>
+				<div class="flex justify-end pt-2">
+					<el-button class="w-min" @click="enviarProductoToPedido" type="success">Guardar</el-button>
+				</div>
+			</div>
 		</main>
 	</el-dialog>
 </template>
@@ -291,6 +423,11 @@ async function generarCopiadoLevantamientoToPedido() {
 
 .tr-tabla-revision {
 	grid-template-columns: 1fr 5fr 1fr 1fr;
+	font-size: 0.9rem !important;
+}
+
+.tr-tabla-revision-compacta {
+	grid-template-columns: 1fr 5fr 1fr;
 	font-size: 0.9rem !important;
 }
 

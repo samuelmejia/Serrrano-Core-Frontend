@@ -4,8 +4,9 @@ import SpinnerLoading from "~/components/SpinnerLoading.vue";
 import PanelPedidoSection from "./partials/PanelPedidoSection.vue";
 
 import { useWindowSize } from "@vueuse/core";
-import type { TPedidoModel } from "~/modules/Module.Compras.Levantamiento/_Data/TiposPedidos";
-import PedidosService from "~/modules/Module.Compras.Levantamiento/Services/PedidosService";
+import type { TPedidoModel } from "~/modules/Module.Compras.Gestiones/_data/TiposPedidos";
+import PedidosService from "~/modules/Module.Compras.Gestiones/services/PedidosService";
+import Mensajes from "~/helpers/Mensajes";
 const { width, height } = useWindowSize();
 
 definePageMeta({
@@ -25,13 +26,13 @@ const stampActualizacionAgregados = ref(0);
 
 const servicioPedidos = new PedidosService();
 
-async function mostrarDetallesLevantamiento(levantamiento: TPedidoModel) {
+async function mostrarDetallesPedido(pedido_param: TPedidoModel) {
 	mostrarRevisadosModal.value = true;
-	infoLevantamiento.value = levantamiento;
+	infoPedido.value = pedido_param;
 	stampActualizacionAgregados.value++;
 }
 
-const infoLevantamiento = ref<TPedidoModel | null>(null);
+const infoPedido = ref<TPedidoModel | null>(null);
 const mostrarRevisadosModal = ref(false);
 const mostrarIniciarPedido = ref(false);
 
@@ -59,10 +60,10 @@ const historicoFiltrar = ref<string>("9");
 const pedidosList = ref<TPedidoModel[]>([]);
 
 watch(historicoFiltrar, () => {
-	obtenerLevantamientos();
+	obtenerPedidos();
 });
 
-function obtenerLevantamientos() {
+function obtenerPedidos() {
 	servicioPedidos.getListPedidosFiltrado("", +historicoFiltrar.value).then((lista) => {
 		pedidosList.value = lista;
 		stampActualizacionTabla.value++;
@@ -71,7 +72,18 @@ function obtenerLevantamientos() {
 	});
 	mostrarRevisadosModal.value = false;
 }
-obtenerLevantamientos();
+obtenerPedidos();
+
+const pedidoCrear = ref({
+	descripcion: "",
+	fechaEntrega: "",
+});
+
+const datePickerPedido = ref("");
+
+function crearPedido() {
+	Mensajes.advertencia("Pendiende de vincular con el servicio de pedidos");
+}
 </script>
 
 <template>
@@ -117,19 +129,36 @@ obtenerLevantamientos();
 				<td class="text-center pr-2" style="text-wrap: nowrap">{{ !row.fechaCierre ? "N/A" : row.fechaCierre }}</td>
 				<td class="text-center pl-2" style="text-wrap: nowrap">{{ !row.fechaEntrega ? "N/A" : row.fechaEntrega }}</td>
 
-				<td class="text-center" :key="stampActualizacionRegistros" @click="mostrarDetallesLevantamiento(row)">
+				<td class="text-center" :key="stampActualizacionRegistros" @click="mostrarDetallesPedido(row)">
 					<el-button :type="historicoFiltrar == '9' ? 'warning' : historicoFiltrar == '10' ? 'success' : 'danger'" :size="width <= 900 ? 'small' : ''"><i class="fas fa-eye"></i></el-button>
 				</td>
 			</tr>
 		</template>
 	</TableFull>
 
-	<el-dialog style="min-height: 90vh; margin: 5vh auto" v-model="mostrarRevisadosModal" title="Detalles de Pedido" :width="width <= 900 ? '90%' : '80%'">
-		<PanelPedidoSection :stamp-reactivo="stampActualizacionAgregados" :key="infoLevantamiento.id" v-if="!!infoLevantamiento" :info-levantamiento="infoLevantamiento" />
+	<el-dialog style="min-height: 90vh; margin: 5vh auto" v-model="mostrarRevisadosModal" title="Detalles de Pedido" :width="width <= 900 ? '95%' : '90%'">
+		<PanelPedidoSection :stamp-reactivo="stampActualizacionAgregados" :key="stampActualizacionAgregados" v-if="!!infoPedido" :info-pedido="infoPedido" />
 	</el-dialog>
 
-	<el-dialog v-model="mostrarIniciarPedido" title="Iniciar Pedido" :width="width <= 900 ? '90%' : '80%'">
-		<div style="border-top: 1px solid gray" class="mt-0 pt-4">Informacion de Levantamiento</div>
+	<el-dialog v-model="mostrarIniciarPedido" title="Iniciar Pedido" :width="width <= 900 ? '70%' : '40%'">
+		<main class="flex flex-col gap-y-2">
+			<div class="col-span-6 sm:col-span-3">
+				<label for="product-name" class="text-sm font-medium text-gray-900 block mb-1">Descripción</label>
+				<input
+					type="text"
+					v-model="pedidoCrear.descripcion"
+					readonly
+					class="shadow-sm border border-black sm:text-sm rounded focus:ring-cyan-600 focus:border-cyan-600 block w-full px-2 py-1 text-center"
+				/>
+			</div>
+			<div class="col-span-6 sm:col-span-3">
+				<label for="category" class="text-sm font-medium text-gray-900 block mb-1">Fecha Entrega</label>
+				<el-date-picker v-model="datePickerPedido" type="date" placeholder="Fecha" />
+			</div>
+			<div class="flex justify-end pt-2">
+				<el-button class="w-min" @click="crearPedido" type="success">Crear</el-button>
+			</div>
+		</main>
 	</el-dialog>
 
 	<SpinnerLoading :visible="loadingState.mostrar" :texto-mostrar="loadingState.texto" />

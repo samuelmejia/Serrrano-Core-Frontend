@@ -103,12 +103,4 @@ export default class LevantamientoHistorialService {
 		}
 		return respuesta.estado;
 	}
-
-	async copiarLevantamientoToPedido(idLevantamiento: number): Promise<boolean> {
-		const respuesta = await this.api.POST_copiarLevantamientoToPedido(idLevantamiento);
-		if (respuesta.estado) {
-			Mensajes.exito("Copia generada.");
-		}
-		return respuesta.estado;
-	}
 }

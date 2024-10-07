@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { Delete as IconDelete } from "@element-plus/icons-vue";
+
 import type { CheckboxValueType } from "element-plus";
 
 import TokenAPI from "~/modules/_Module.API/TokenAPI";
@@ -6,30 +8,31 @@ import type { TPermisoTiendaModel } from "~/modules/_Module.API/TUsuarioAPIModel
 import { EstadoSolicitarStore } from "~/modules/Module.Compras.Levantamiento/API/EstadoSolicitarStore";
 
 import { useWindowSize } from "@vueuse/core";
-import type { TPedidoDomain, TPedidoModel, TPedidoProductoModel } from "~/modules/Module.Compras.Levantamiento/_Data/TiposPedidos";
-import PedidosService from "~/modules/Module.Compras.Levantamiento/Services/PedidosService";
+import type { TPedidoDomain, TPedidoModel, TPedidoProductoModel } from "~/modules/Module.Compras.Gestiones/_data/TiposPedidos";
+import PedidosService from "~/modules/Module.Compras.Gestiones/services/PedidosService";
+import Mensajes from "~/helpers/Mensajes";
 const { width, height } = useWindowSize();
 const storeEstadoSolicitar = EstadoSolicitarStore();
 storeEstadoSolicitar.load();
 
 //COMUNICACION DE COMPONENTE
 const props = defineProps<{
-	infoLevantamiento: TPedidoDomain;
+	infoPedido: TPedidoDomain;
 }>();
 
 //VARIABLES REACTIVAS
 const stampReactivo = ref(0);
-const stampActualizacionDetalles = ref(0);
-const stampActualizacionExistencias = ref(0);
 
 const servicioPedido = new PedidosService();
 
 const dataRevision = ref<TPedidoModel | null>(null);
 
-servicioPedido.getPedidoConProductos(props.infoLevantamiento.id).then((data) => {
-	dataRevision.value = data;
-	stampReactivo.value++;
-});
+function obtenerProductosPedidos() {
+	servicioPedido.getPedidoConProductos(props.infoPedido.id).then((data) => {
+		dataRevision.value = data;
+		stampReactivo.value++;
+	});
+}
 
 const defaultPageRevision = ref<number | null>(null);
 
@@ -58,14 +61,15 @@ type TDataEstado = {
 };
 
 const listaEstados: TDataEstado[] = [
-	{ id: "3", descripcion: "FINALIZADO" },
-	{ id: "7", descripcion: "APROBADO" },
-	{ id: "8", descripcion: "DECLINADO" },
+	{ id: "9", descripcion: "ABIERTO" },
+	{ id: "10", descripcion: "EN ESPERA" },
+	{ id: "11", descripcion: "CANCELADO" },
+	{ id: "12", descripcion: "CERRADO" },
 ];
 
 const mostrarEstadoLevantamientoModal = ref(false);
 
-const estadoPorModificar = ref<string>(listaEstados.find((x) => x.descripcion == props.infoLevantamiento.estado)?.id ?? "");
+const estadoPorModificar = ref<string>(listaEstados.find((x) => x.descripcion == props.infoPedido.estado)?.id ?? "");
 
 function cambiarEstado() {
 	mostrarEstadoLevantamientoModal.value = false;
@@ -73,6 +77,20 @@ function cambiarEstado() {
 }
 
 function ingresoPedido(detalle: TPedidoProductoModel, origen: string) {}
+
+async function guardarRegistro(producto: TPedidoProductoModel) {
+	await servicioPedido.guardarProductoDePedido(producto);
+	obtenerProductosPedidos();
+}
+
+async function quitarRegistro(producto: TPedidoProductoModel) {
+	await servicioPedido.eliminarProductoDePedido(props.infoPedido.id, producto.codProducto);
+	obtenerProductosPedidos();
+}
+
+onMounted(() => {
+	obtenerProductosPedidos();
+});
 </script>
 
 <template>
@@ -82,7 +100,8 @@ function ingresoPedido(detalle: TPedidoProductoModel, origen: string) {}
 				<label for="product-name" class="text-sm font-medium text-gray-900 block mb-1">Creador</label>
 				<input
 					type="text"
-					:value="props.infoLevantamiento.usuarioResponsable"
+					:value="props.infoPedido.usuarioResponsable"
+					readonly
 					class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded focus:ring-cyan-600 focus:border-cyan-600 block w-full px-2 py-1 text-center"
 				/>
 			</div>
@@ -90,7 +109,25 @@ function ingresoPedido(detalle: TPedidoProductoModel, origen: string) {}
 				<label for="category" class="text-sm font-medium text-gray-900 block mb-1">Fecha Creación</label>
 				<input
 					type="text"
-					:value="props.infoLevantamiento.fechaCreacion"
+					:value="props.infoPedido.fechaCreacion"
+					readonly
+					class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded focus:ring-cyan-600 focus:border-cyan-600 block w-full px-2 py-1 text-center"
+				/>
+			</div>
+			<div class="col-span-6 sm:col-span-3">
+				<label for="product-name" class="text-sm font-medium text-gray-900 block mb-1">Descripción</label>
+				<input
+					type="text"
+					:value="props.infoPedido.descripcion"
+					class="shadow-sm bg-green-100 border border-gray-300 text-gray-900 sm:text-sm rounded focus:ring-cyan-600 focus:border-cyan-600 block w-full px-2 py-1 text-center"
+				/>
+			</div>
+			<div class="col-span-6 sm:col-span-3">
+				<label for="category" class="text-sm font-medium text-gray-900 block mb-1">Fecha Entrega</label>
+				<input
+					type="text"
+					:value="props.infoPedido.fechaEntrega"
+					readonly
 					class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded focus:ring-cyan-600 focus:border-cyan-600 block w-full px-2 py-1 text-center"
 				/>
 			</div>
@@ -102,7 +139,7 @@ function ingresoPedido(detalle: TPedidoProductoModel, origen: string) {}
 			<TableFull
 				:espacio-botones="true"
 				:usar-filtrado-externo="false"
-				:page-size="10"
+				:page-size="7"
 				:default-page="defaultPageRevision"
 				tam-campo-busqueda="60%"
 				v-if="!!dataRevision?.productos"
@@ -118,6 +155,7 @@ function ingresoPedido(detalle: TPedidoProductoModel, origen: string) {}
 						<th>CANTIDAD</th>
 						<th>OBSERVACIONES</th>
 						<th>GUARDAR</th>
+						<th>ELIMINAR</th>
 					</tr>
 				</template>
 				<template v-slot:tbody="{ dataMostrada, paginaActual }">
@@ -130,8 +168,8 @@ function ingresoPedido(detalle: TPedidoProductoModel, origen: string) {}
 							{{ row.marca }}
 						</td>
 						<td class="text-center">
-							<a :href="`/inventario/kardex?codProducto=${row.codProducto}`" target="_blank">
-								<el-button type="info" plain><i class="fas fa-external-link-alt"></i></el-button>
+							<a tabindex="-1" :href="`/inventario/kardex?codProducto=${row.codProducto}`" target="_blank">
+								<el-button tabindex="-1" type="info" plain><i class="fas fa-external-link-alt"></i></el-button>
 							</a>
 						</td>
 						<td class="text-left">
@@ -141,17 +179,24 @@ function ingresoPedido(detalle: TPedidoProductoModel, origen: string) {}
 							<input type="text" class="text-center py-1 border border-black" v-model="row.observaciones" @input="ingresoPedido(row, 'observaciones')" style="width: 100%" />
 						</td>
 						<td class="text-center">
-							<el-button type="success" plain><i class="fas fa-save"></i></el-button>
+							<el-button @click="guardarRegistro(row)" type="success" plain><i class="fas fa-save"></i></el-button>
+						</td>
+						<td class="text-center">
+							<el-button type="danger" @click="quitarRegistro(row)" :icon="IconDelete" circle />
 						</td>
 					</tr>
 				</template>
 			</TableFull>
-			<section class="my-2">
+			<section class="my-2 grid" style="grid-template-columns: 60% 40%">
 				<div class="flex flex-col w-min">
 					<b>Estado: </b>
 					<el-tooltip class="box-item" effect="dark" content="Click para cambiar estado" placement="top">
-						<span @click="mostrarEstadoLevantamientoModal = true" class="cursor-pointer">{{ props.infoLevantamiento.estado }}</span>
+						<span @click="mostrarEstadoLevantamientoModal = true" class="cursor-pointer">{{ props.infoPedido.estado }}</span>
 					</el-tooltip>
+				</div>
+				<div>
+					<b>Observaciones: </b>
+					<textarea class="w-full p-1 bg-yellow-100" v-model="props.infoPedido.observaciones"></textarea>
 				</div>
 			</section>
 		</div>
@@ -206,7 +251,7 @@ function ingresoPedido(detalle: TPedidoProductoModel, origen: string) {}
 }
 
 .tr-tabla-revision {
-	grid-template-columns: 1fr 4fr 1fr 1fr 1fr 2fr 1fr;
+	grid-template-columns: 1fr 5fr 1fr 1fr 1fr 2fr 1fr 1fr;
 	font-size: 0.9rem;
 }
 </style>

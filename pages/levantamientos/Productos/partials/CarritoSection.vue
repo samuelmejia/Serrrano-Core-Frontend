@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import DetallesProductoModal from "~/components/Compras.Levantamiento/DetallesProductoModal.vue";
 
-import { Delete } from "@element-plus/icons-vue";
+import { Delete as IconDelete } from "@element-plus/icons-vue";
 import type { CheckboxValueType } from "element-plus";
 
 import type { TLevantamientoProductoModel, TProductoModel } from "~/modules/Module.Compras.Levantamiento/Types/TProductoModel";
@@ -257,7 +257,7 @@ const dataFinalizar = ref({
 						<el-button type="info" plain @click="verDetalleProducto(row)" style="width: min-content"><i class="fas fa-eye"></i></el-button>
 					</td>
 					<td class="flex items-center justify-center">
-						<el-button type="danger" @click="quitarDeLevantamiento(row, paginaActual)" :icon="Delete" circle />
+						<el-button type="danger" @click="quitarDeLevantamiento(row, paginaActual)" :icon="IconDelete" circle />
 					</td>
 				</tr>
 			</template>
@@ -317,7 +317,7 @@ const dataFinalizar = ref({
 
 					<div class="flex flex-col">
 						<b>Observaciones:</b>
-						<textarea v-model="productoVisualizado.observaciones" class="border w-full"></textarea>
+						<textarea v-model="productoVisualizado.observaciones" class="border w-full bg-yellow-100"></textarea>
 					</div>
 				</div>
 			</fieldset>

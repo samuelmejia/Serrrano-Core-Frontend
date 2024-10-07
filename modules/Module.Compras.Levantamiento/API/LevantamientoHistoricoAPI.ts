@@ -107,21 +107,4 @@ export default class LevantamientoHistoricoAPI {
 			mensaje: "Error al finalizar el levantamiento",
 		};
 	}
-
-	async POST_copiarLevantamientoToPedido(idLevantamiento: number): Promise<{ estado: boolean; mensaje: string }> {
-		const api = new API();
-		const resData = await api.post<{ message: string }>("/pedidos/copiarLevantamiento", { idLevantamiento });
-
-		if (!!resData) {
-			return {
-				estado: true,
-				mensaje: resData.message,
-			};
-		}
-
-		return {
-			estado: false,
-			mensaje: "Error al generar la copia",
-		};
-	}
 }
