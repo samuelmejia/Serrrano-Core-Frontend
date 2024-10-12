@@ -4,6 +4,7 @@ type TProductoDomain = {
 	linea: string;
 	categoria: string;
 	marca: string;
+	codigoBarra: string;
 	impuesto: string;
 	stockTotal: number;
 	fechaUltimaCompra: string;

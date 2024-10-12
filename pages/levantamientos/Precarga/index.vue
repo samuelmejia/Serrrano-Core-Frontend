@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import DetallesProductoModal from "~/components/Compras.Levantamiento/DetallesProductoModal.vue";
+import PanelInfoProducto from "~/components/Compras.Levantamiento/PanelInfoProducto.vue";
 import CarritoSection from "./partials/CarritoSection.vue";
 import TableFull from "~/components/TableFull.vue";
 import Numeros from "~/helpers/Numeros";
@@ -7,15 +8,16 @@ import Texto from "~/helpers/Texto";
 import LevantamientoController from "~/modules/Module.Compras.Levantamiento/Controllers/LevantamientoController";
 import type { TLevantamientoProductoModel, TProductoModel } from "~/modules/Module.Compras.Levantamiento/Types/TProductoModel";
 import SpinnerLoading from "~/components/SpinnerLoading.vue";
-import Mensajes from "~/helpers/Mensajes";
 
 import { useWindowSize } from "@vueuse/core";
+import InformacionService from "~/modules/Module.Compras.Levantamiento/Services/InformacionService";
+import type { TInfoProveedorDomain } from "~/modules/Module.Compras.Levantamiento/_Data/TipoInformacion";
 const { width, height } = useWindowSize();
 
 definePageMeta({
 	layout: "general",
-	title: "Productos",
-	subTitle: "Revisa el inventario para seleccionar los productos que necesitas",
+	title: "Precarga",
+	subTitle: "Visualiza los productos en base a un filtrado",
 });
 
 const loadingState = reactive({
@@ -56,6 +58,7 @@ async function mostrarDetalleProducto(producto: TProductoModel) {
 
 const mostrarRevisadosModal = ref(false);
 const mostrarDetallesProductoModal = ref(false);
+const mostrarFormularioIniciarPrecarga = ref(false);
 
 const productoMostrarDetalle = ref(<TProductoModel>{});
 
@@ -99,12 +102,7 @@ const levantamientoEnProceso = ref(false);
 
 async function confirmarInicioLevantamiento() {
 	try {
-		const res = await ElMessageBox.confirm("Desea iniciar un proceso de Levantamiento?");
-
-		if (res == "confirm") {
-			const respuestaProceso = await controller.iniciarLevantamiento();
-			if (respuestaProceso) location.reload();
-		}
+		mostrarFormularioIniciarPrecarga.value = true;
 	} catch (e: any) {}
 }
 
@@ -129,12 +127,35 @@ setTimeout(() => {
 	esperaCarga.value = false;
 }, 2500);
 
-watch(
-	() => width.value,
-	(newValue: number) => {
-		console.log("width", newValue);
-	}
-);
+mostrarFormularioIniciarPrecarga.value = true;
+
+const stampProveedores = ref(0);
+const stampMarcas = ref(0);
+
+const proveedor = ref("");
+let opcionesProveedor: { value: string; label: string }[] = [];
+
+const servicioInformacion = new InformacionService();
+
+onMounted(() => {
+	servicioInformacion.getProveedores().then((proveedores) => {
+		opcionesProveedor = proveedores.map((x) => {
+			return { value: x.idProveedor, label: x.nombreProveedor };
+		});
+
+		console.log("opcionesProveedor", opcionesProveedor);
+		stampProveedores.value++;
+	});
+});
+
+const mostrarModalProveedores = ref(false);
+
+const infoProveedor = ref<TInfoProveedorDomain | null>(null);
+function seleccionarProveedor(proveedor: TInfoProveedorDomain) {
+	console.log("seleccionarProveedor", proveedor);
+	infoProveedor.value = proveedor;
+	mostrarModalProveedores.value = false;
+}
 </script>
 
 <template>
@@ -161,7 +182,7 @@ watch(
 			:default-campo-busqueda="defaultCampoBusqueda"
 			v-if="!!controller.getAllProductos()"
 			:data-recibida="controller.getAllProductos()"
-			:filter="[{ codigo: 'string' }, { nombre: 'string' }, { modelo: 'string' }, { marca: 'string' }, { codigoBarras: 'array' }]"
+			:filter="[{ codigo: 'string' }, { nombre: 'string' }, { modelo: 'string' }, { marca: 'string' }]"
 		>
 			<template v-slot:thead="{ th }">
 				<tr style="font-size: 0.9rem" :class="levantamientoEnProceso ? `tr-registro-en-levantamiento` : `tr-registro-no-levantamiento`" class="bg-gray-50 text-gray-700 px-4 py-2 select-none grid">
@@ -171,7 +192,7 @@ watch(
 					<th v-if="width >= 900">CATEGORIA</th>
 					<th class="cursor-pointer" @click="th.setSort({ fechaUltimaVenta: 'date' })" v-html="th.mostrarLabel({ fechaUltimaVenta: 'ULTIMA V.' })"></th>
 					<th class="cursor-pointer" @click="th.setSort({ stockTotal: 'number' })" v-html="th.mostrarLabel({ stockTotal: 'STOCK T.' })"></th>
-					<th>DETALLE</th>
+					<th>INF.PRD</th>
 					<th v-if="levantamientoEnProceso">AGREGAR</th>
 				</tr>
 			</template>
@@ -213,19 +234,59 @@ watch(
 		<CarritoSection v-if="controller.getCantidadProductosAgregadosLevantamiento() > 0" :stamp-reactivo="stampActualizacionAgregados" @emit-producto-quitado-levantamiento="quitarDeLevantamiento" />
 	</el-dialog>
 
-	<el-dialog v-model="mostrarDetallesProductoModal" title="Detalle de Producto" :width="width <= 900 ? '90%' : '80%'">
+	<el-dialog v-model="mostrarDetallesProductoModal" title="Detalle de Producto" :width="width <= 900 ? '95%' : '90%'">
 		<div style="border-top: 1px solid gray" class="mt-0 pt-4">
-			<DetallesProductoModal
-				:key="stampActualizacionExistencias"
-				v-if="mostrarDetallesProductoModal"
-				:codigo="productoMostrarDetalle.codigo"
-				:descripcion="productoMostrarDetalle.nombre"
-				:marca="productoMostrarDetalle.marca"
-				:detalle-existencias="productoMostrarDetalle.detalleExistencias"
-				:codigos-barra="productoMostrarDetalle.codigoBarras"
-				:ver-precio="false"
-			/>
+			<PanelInfoProducto :key="stampActualizacionExistencias" v-if="mostrarDetallesProductoModal" :producto="productoMostrarDetalle" />
 		</div>
+	</el-dialog>
+
+	<el-dialog v-model="mostrarFormularioIniciarPrecarga" title="Iniciar Levantamiento con Precarga" :width="width <= 900 ? '70%' : '60%'">
+		<div style="border-top: 1px solid gray" class="mt-0 pt-4">
+			<div class="mb-6">
+				<label class="block text-gray-800 font-bold mb-2"> Proveedor </label>
+				<div class="grid gap-x-4" style="grid-template-columns: 0.5fr 1fr 2fr">
+					<div class="text-center">
+						<el-button @click="mostrarModalProveedores = true" type="info" plain><i class="fas fa-search"></i></el-button>
+					</div>
+					<input
+						:value="infoProveedor ? infoProveedor.rtn : ''"
+						readonly
+						class="shadow bg-gray-100 border rounded w-full py-2 px-3 text-gray-700 focus:outline-none focus:shadow-outline"
+						type="text"
+					/>
+					<input
+						:value="infoProveedor ? infoProveedor.nombreProveedor : ''"
+						readonly
+						class="shadow bg-gray-100 border rounded w-full py-2 px-3 text-gray-700 focus:outline-none focus:shadow-outline"
+						type="text"
+					/>
+				</div>
+			</div>
+			<div class="mb-6">
+				<label class="block text-gray-800 font-bold mb-2"> Marca </label>
+				<div class="grid gap-x-4" style="grid-template-columns: 0.5fr 1fr 2fr">
+					<div class="text-center">
+						<el-button type="info" plain><i class="fas fa-search"></i></el-button>
+					</div>
+					<input value="" readonly class="shadow bg-gray-100 border rounded w-full py-2 px-3 text-gray-700 focus:outline-none focus:shadow-outline" type="text" />
+					<span></span>
+				</div>
+			</div>
+			<div class="mb-6">
+				<label class="block text-gray-800 font-bold mb-2"> Modelo </label>
+				<div class="grid gap-x-4" style="grid-template-columns: 0.5fr 1fr 2fr">
+					<div class="text-center"></div>
+					<input value="" class="shadow border rounded w-full py-2 px-3 text-gray-700 focus:outline-none focus:shadow-outline" type="text" />
+				</div>
+			</div>
+			<div class="mb-6 flex justify-end">
+				<el-button type="success" @click="" size="large"> Iniciar </el-button>
+			</div>
+		</div>
+	</el-dialog>
+
+	<el-dialog v-model="mostrarModalProveedores" title="Buscar Proveedor" :width="width <= 900 ? '80%' : '65%'">
+		<BuscarProveedor @cancelar="mostrarModalProveedores = false" @proveedor-encontrado="seleccionarProveedor" />
 	</el-dialog>
 
 	<SpinnerLoading :visible="loadingState.mostrar" :texto-mostrar="loadingState.texto" />

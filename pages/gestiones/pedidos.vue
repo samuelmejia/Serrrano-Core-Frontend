@@ -7,6 +7,7 @@ import { useWindowSize } from "@vueuse/core";
 import type { TPedidoModel } from "~/modules/Module.Compras.Gestiones/_data/TiposPedidos";
 import PedidosService from "~/modules/Module.Compras.Gestiones/services/PedidosService";
 import Mensajes from "~/helpers/Mensajes";
+import Fechas from "~/helpers/Fechas";
 const { width, height } = useWindowSize();
 
 definePageMeta({
@@ -81,8 +82,14 @@ const pedidoCrear = ref({
 
 const datePickerPedido = ref("");
 
-function crearPedido() {
-	Mensajes.advertencia("Pendiende de vincular con el servicio de pedidos");
+async function crearPedido() {
+	pedidoCrear.value.fechaEntrega = Fechas.Date_To_String(new Date(datePickerPedido.value));
+	await servicioPedidos.crearPedido(pedidoCrear.value.descripcion, pedidoCrear.value.fechaEntrega);
+
+	mostrarIniciarPedido.value = false;
+	obtenerPedidos();
+	pedidoCrear.value.descripcion = "";
+	pedidoCrear.value.fechaEntrega = "";
 }
 </script>
 
@@ -144,12 +151,7 @@ function crearPedido() {
 		<main class="flex flex-col gap-y-2">
 			<div class="col-span-6 sm:col-span-3">
 				<label for="product-name" class="text-sm font-medium text-gray-900 block mb-1">Descripción</label>
-				<input
-					type="text"
-					v-model="pedidoCrear.descripcion"
-					readonly
-					class="shadow-sm border border-black sm:text-sm rounded focus:ring-cyan-600 focus:border-cyan-600 block w-full px-2 py-1 text-center"
-				/>
+				<input type="text" v-model="pedidoCrear.descripcion" class="shadow-sm border border-black sm:text-sm rounded focus:ring-cyan-600 focus:border-cyan-600 block w-full px-2 py-1" />
 			</div>
 			<div class="col-span-6 sm:col-span-3">
 				<label for="category" class="text-sm font-medium text-gray-900 block mb-1">Fecha Entrega</label>

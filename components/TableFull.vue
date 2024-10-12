@@ -53,6 +53,9 @@ function filtrarDataTabla() {
 			if (tipo == "number") {
 				return regExpresion.test(campo.toString());
 			}
+			if (tipo == "array") {
+				return campo.some((z: any) => regExpresion.test(z));
+			}
 			return regExpresion.test(campo);
 		});
 	});

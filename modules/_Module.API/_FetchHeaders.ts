@@ -20,7 +20,7 @@ export default class FetchHeaders {
 		10: ubicado en la interna
 		*/
 
-		FetchHeaders.baseURL = inicioRuta == 45 || inicioRuta == 0 ? RuntimeService.getConfig().public.BASE_URL_PUBLICA : RuntimeService.getConfig().public.BASE_URL_INTERNA;
+		FetchHeaders.baseURL = inicioRuta == 45 ? RuntimeService.getConfig().public.BASE_URL_PUBLICA : RuntimeService.getConfig().public.BASE_URL_INTERNA;
 	}
 
 	public static getInstance() {

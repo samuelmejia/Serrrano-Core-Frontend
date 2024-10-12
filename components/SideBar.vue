@@ -36,6 +36,7 @@ function cerrarSesion() {
 							</summary>
 							<div class="accordion-content ml-6" style="border-left: 1px solid">
 								<NuxtLink to="/levantamientos/productos" class="flex items-center px-4 py-1 mt-1 hover:bg-gray-200 hover-text-orange-600">Ver Productos</NuxtLink>
+								<NuxtLink to="/levantamientos/precarga" class="flex items-center px-4 py-1 mt-1 hover:bg-gray-200 hover-text-orange-600">Visualizar con Precarga</NuxtLink>
 								<NuxtLink to="/levantamientos/historico" class="flex items-center px-4 py-1 mt-1 hover:bg-gray-200 hover-text-orange-600">Histórico</NuxtLink>
 							</div>
 						</details>

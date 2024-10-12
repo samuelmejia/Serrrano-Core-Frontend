@@ -45,7 +45,30 @@ export default class PedidosAPI {
 		};
 	}
 
-	async POST_NuevoActualizarPedido(pedido: TPedidoModel): Promise<{ estado: boolean; mensaje: string }> {
+	async POST_NuevoPedido(idPedido: number, descripcion: string, fechaEntrega: string): Promise<{ estado: boolean; mensaje: string }> {
+		const body = {
+			idPedido,
+			descripcion,
+			fechaEntrega,
+		};
+
+		const api = new API();
+		const resData = await api.post<{ message: string }>(`/pedidos`, body);
+
+		if (!!resData) {
+			return {
+				estado: true,
+				mensaje: resData.message,
+			};
+		}
+
+		return {
+			estado: false,
+			mensaje: "Error al crear Pedido",
+		};
+	}
+
+	async PUT_ActualizarPedido(pedido: TPedidoModel): Promise<{ estado: boolean; mensaje: string }> {
 		const body = {
 			idPedido: pedido.id,
 			descripcion: pedido.descripcion,

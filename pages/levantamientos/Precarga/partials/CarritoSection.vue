@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import DetallesProductoModal from "~/components/Compras.Levantamiento/DetallesProductoModal.vue";
+import PanelInfoProducto from "~/components/Compras.Levantamiento/PanelInfoProducto.vue";
 
 import { Delete as IconDelete } from "@element-plus/icons-vue";
 import type { CheckboxValueType } from "element-plus";
@@ -11,13 +12,7 @@ import TokenAPI from "~/modules/_Module.API/TokenAPI";
 import type { TPermisoTiendaModel } from "~/modules/_Module.API/TUsuarioAPIModel";
 import Mensajes from "~/helpers/Mensajes";
 
-import { EstadoSolicitarStore } from "~/modules/Module.Compras.Levantamiento/API/EstadoSolicitarStore";
-
 import { useWindowSize } from "@vueuse/core";
-
-const { width, height } = useWindowSize();
-const storeEstadoSolicitar = EstadoSolicitarStore();
-storeEstadoSolicitar.load();
 
 const controller = LevantamientoController.getInstance();
 
@@ -73,42 +68,6 @@ const checkAll = ref(false);
 const indeterminate = ref(false);
 const valoresChecks = ref<CheckboxValueType[]>([]);
 const bodegasExistentes = ref<TPermisoTiendaModel[]>(TokenAPI.getPermisosTienda());
-
-/*
-const bodegasExistentes = [
-	{
-		value: "0101",
-		label: "(1) TIENDA PRINCIPAL",
-	},
-	{
-		value: "0102",
-		label: "(2) BODEGA PRINCIPAL",
-	},
-	{
-		value: "0103",
-		label: "(3) PINTURA",
-	},
-	{
-		value: "0104",
-		label: "(4) PATIO SUCURSAL",
-	},
-	{
-		value: "0105",
-		label: "(5) MADERA",
-	},
-	{
-		value: "0106",
-		label: "(6) CAJA RAPIDA",
-	},
-	{
-		value: "0107",
-		label: "(7) WILLIE WARREN",
-	},
-	{
-		value: "0108",
-		label: "INVENTATIO EN BIP",
-	},
-];*/
 
 watch(valoresChecks, (val) => {
 	if (val.length === 0) {
@@ -169,14 +128,16 @@ function guardarProgreso() {
 	controller.servicioLevantamiento.guardarProgresoProductosTodos();
 }
 
-const mostrarDetallesModal = ref(false);
 const productoMostrarDetalle = ref(<TLevantamientoProductoModel>{});
 
 function verDetalleProducto(producto: TLevantamientoProductoModel) {
 	productoMostrarDetalle.value = producto;
 	stampActualizacionExistencias.value++;
 
-	mostrarDetallesModal.value = true;
+	const enlace = <HTMLAnchorElement>document.createElement("a");
+	enlace.href = "/inventario/kardex?codProducto=" + producto.codigo;
+	enlace.target = "_blank";
+	enlace.click();
 }
 
 function ingresoProducto(detalle: TProductoDetalleModel, origen: string) {
@@ -237,7 +198,7 @@ const dataFinalizar = ref({
 				<tr style="font-size: 0.9rem" class="bg-gray-50 text-gray-700 px-2 py-2 select-none grid tr-tabla-revision">
 					<th>CODIGO</th>
 					<th>NOMBRE</th>
-					<th>DETALLE</th>
+					<th>INF.PRD</th>
 					<th>QUITAR</th>
 				</tr>
 			</template>
@@ -269,8 +230,7 @@ const dataFinalizar = ref({
 					<tr style="font-size: 0.9rem" class="bg-gray-50 text-gray-700 py-2 select-none grid tr-tabla-detalles">
 						<th>UBICACION</th>
 						<th>DISP.</th>
-						<th>ENCONT.</th>
-						<th>SOLICITADO</th>
+						<th>CANTIDAD</th>
 					</tr>
 				</template>
 				<template v-slot:tbody="{ dataMostrada }">
@@ -296,13 +256,6 @@ const dataFinalizar = ref({
 								style="width: 100%"
 							/>
 						</td>
-						<td class="px-2">
-							<select v-model="row.solicitar" @change="ingresoProducto(row, 'solicitar')" class="bg-white border py-1 pl-1 rounded" :disabled="!valoresChecks.includes(row.codigoTienda)">
-								<template v-for="estado of storeEstadoSolicitar.get">
-									<option :value="estado.id">{{ estado.descripcion }}</option>
-								</template>
-							</select>
-						</td>
 					</tr>
 				</template>
 			</TableFull>
@@ -323,20 +276,6 @@ const dataFinalizar = ref({
 			</fieldset>
 		</div>
 	</div>
-
-	<el-dialog v-model="mostrarDetallesModal" title="Detalle de Producto" width="80%">
-		<div style="border-top: 1px solid gray" class="mt-0 pt-4">
-			<DetallesProductoModal
-				:key="stampActualizacionExistencias"
-				v-if="mostrarDetallesModal"
-				:codigo="productoMostrarDetalle.codigo"
-				:descripcion="productoMostrarDetalle.descripcion"
-				:marca="productoMostrarDetalle.marca"
-				:detalle-existencias="productoMostrarDetalle.detalleExistencias"
-				:ver-precio="false"
-			/>
-		</div>
-	</el-dialog>
 
 	<el-dialog v-model="mostrarPanelFinalizar" title="Información de Finalización" width="60%">
 		<div style="border-top: 1px solid gray" class="mt-0 pt-4">
@@ -398,7 +337,7 @@ const dataFinalizar = ref({
 }
 
 .tr-tabla-detalles {
-	grid-template-columns: 3fr 1fr 1fr 2fr;
+	grid-template-columns: 2fr 1fr 1fr;
 }
 
 .tr-detalles_no-usar {

@@ -7,6 +7,7 @@ type TProductoModel = {
 	linea: string;
 	categoria: string;
 	marca: string;
+	codigoBarras: string[];
 	stockTotal: number;
 	impuesto: number;
 	fechaUltimaCompra: string;

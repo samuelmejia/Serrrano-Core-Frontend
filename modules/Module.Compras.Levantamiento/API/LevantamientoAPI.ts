@@ -10,7 +10,7 @@ export default class LevantamientoAPI {
 
 	async POST_IniciarLevantamiento(): Promise<{ estado: boolean; mensaje: string }> {
 		const api = new API();
-		const resData = await api.post<any>("/Levantamiento/CreaLevantamiento", "192.168.22.10");
+		const resData = await api.post<any>("/Levantamiento/CreaLevantamiento");
 
 		if (!!resData) {
 			return {
@@ -183,7 +183,6 @@ export default class LevantamientoAPI {
 				}),
 		};
 
-		console.log("POST_GuardarProgresoProducto", objetoEnviar);
 		const api = new API();
 		const resData = await api.post<any>("/Levantamiento/PGGuardarProgreso", [objetoEnviar]);
 

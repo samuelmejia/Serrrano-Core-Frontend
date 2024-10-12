@@ -11,6 +11,7 @@ import { useWindowSize } from "@vueuse/core";
 import type { TPedidoDomain, TPedidoModel, TPedidoProductoModel } from "~/modules/Module.Compras.Gestiones/_data/TiposPedidos";
 import PedidosService from "~/modules/Module.Compras.Gestiones/services/PedidosService";
 import Mensajes from "~/helpers/Mensajes";
+import Fechas from "~/helpers/Fechas";
 const { width, height } = useWindowSize();
 const storeEstadoSolicitar = EstadoSolicitarStore();
 storeEstadoSolicitar.load();
@@ -88,15 +89,32 @@ async function quitarRegistro(producto: TPedidoProductoModel) {
 	obtenerProductosPedidos();
 }
 
+async function guardardatosPedido() {
+	const fE = Fechas.Date_To_String(new Date(datePickerPedido.value));
+	await servicioPedido.actualizarPedido(props.infoPedido.id, descripcion.value, fE);
+}
+
 onMounted(() => {
 	obtenerProductosPedidos();
+});
+
+const input3 = ref("");
+
+const descripcion = ref("");
+const datePickerPedido = ref("");
+
+onMounted(() => {
+	if (props.infoPedido.fechaEntrega) {
+		datePickerPedido.value = props.infoPedido.fechaEntrega;
+	}
+	descripcion.value = props.infoPedido.descripcion;
 });
 </script>
 
 <template>
 	<div class="grid">
 		<div class="grid" :class="width <= 900 ? 'grid-cols-6 gap-2' : 'grid-cols-12 gap-6'">
-			<div class="col-span-6 sm:col-span-3">
+			<div class="col-span-6 sm:col-span-2">
 				<label for="product-name" class="text-sm font-medium text-gray-900 block mb-1">Creador</label>
 				<input
 					type="text"
@@ -105,8 +123,8 @@ onMounted(() => {
 					class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded focus:ring-cyan-600 focus:border-cyan-600 block w-full px-2 py-1 text-center"
 				/>
 			</div>
-			<div class="col-span-6 sm:col-span-3">
-				<label for="category" class="text-sm font-medium text-gray-900 block mb-1">Fecha Creación</label>
+			<div class="col-span-6 sm:col-span-2">
+				<label class="text-sm font-medium text-gray-900 block mb-1">Fecha Creación</label>
 				<input
 					type="text"
 					:value="props.infoPedido.fechaCreacion"
@@ -114,22 +132,22 @@ onMounted(() => {
 					class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded focus:ring-cyan-600 focus:border-cyan-600 block w-full px-2 py-1 text-center"
 				/>
 			</div>
-			<div class="col-span-6 sm:col-span-3">
-				<label for="product-name" class="text-sm font-medium text-gray-900 block mb-1">Descripción</label>
+			<div class="col-span-6 sm:col-span-4">
+				<label class="text-sm font-medium text-gray-900 block mb-1">Descripción</label>
 				<input
 					type="text"
 					:value="props.infoPedido.descripcion"
 					class="shadow-sm bg-green-100 border border-gray-300 text-gray-900 sm:text-sm rounded focus:ring-cyan-600 focus:border-cyan-600 block w-full px-2 py-1 text-center"
 				/>
 			</div>
-			<div class="col-span-6 sm:col-span-3">
-				<label for="category" class="text-sm font-medium text-gray-900 block mb-1">Fecha Entrega</label>
-				<input
-					type="text"
-					:value="props.infoPedido.fechaEntrega"
-					readonly
-					class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded focus:ring-cyan-600 focus:border-cyan-600 block w-full px-2 py-1 text-center"
-				/>
+			<div class="col-span-6 sm:col-span-2">
+				<label class="text-sm font-medium text-gray-900 block mb-1">Fecha Entrega</label>
+
+				<el-date-picker v-model="datePickerPedido" class="bg-green-100" type="date" placeholder="Fecha" />
+			</div>
+			<div class="col-span-6 sm:col-span-2 flex flex-col items-center">
+				<label class="text-sm font-medium text-gray-900 block mb-1">Guardar</label>
+				<el-button type="info" @click="guardardatosPedido" plain><i class="fas fa-save"></i></el-button>
 			</div>
 		</div>
 	</div>
