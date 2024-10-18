@@ -1,5 +1,5 @@
 import API from "~/modules/_Module.API/API";
-import type { TInfoProveedorDomain } from "../_Data/TipoInformacion";
+import type { TInfoMarcaDomain, TInfoProveedorDomain } from "../_Data/TipoInformacion";
 
 export default class InfoAPI {
 	constructor() {}

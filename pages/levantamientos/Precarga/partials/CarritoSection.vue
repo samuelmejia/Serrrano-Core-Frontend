@@ -1,20 +1,15 @@
 <script setup lang="ts">
-import DetallesProductoModal from "~/components/Compras.Levantamiento/DetallesProductoModal.vue";
-import PanelInfoProducto from "~/components/Compras.Levantamiento/PanelInfoProducto.vue";
-
 import { Delete as IconDelete } from "@element-plus/icons-vue";
 import type { CheckboxValueType } from "element-plus";
 
 import type { TLevantamientoProductoModel, TProductoModel } from "~/modules/Module.Compras.Levantamiento/Types/TProductoModel";
 import type { TProductoDetalleExistenciasModel, TProductoDetalleModel } from "~/modules/Module.Compras.Levantamiento/Types/TProductoDetalleExistenciasModel";
-import LevantamientoController from "~/modules/Module.Compras.Levantamiento/Controllers/LevantamientoController";
+import PrecargaController from "~/modules/Module.Compras.Levantamiento/Controllers/PrecargaController";
 import TokenAPI from "~/modules/_Module.API/TokenAPI";
 import type { TPermisoTiendaModel } from "~/modules/_Module.API/TUsuarioAPIModel";
 import Mensajes from "~/helpers/Mensajes";
 
-import { useWindowSize } from "@vueuse/core";
-
-const controller = LevantamientoController.getInstance();
+const controller = PrecargaController.getInstance();
 
 //COMUNICACION DE COMPONENTE
 const props = defineProps<{

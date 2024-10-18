@@ -8,7 +8,7 @@ const props = defineProps<{
 </script>
 
 <template>
-	<div class="flex flex-col my-4">
+	<div class="flex gap-x-8 my-4">
 		<span><b>Codigo: </b> {{ props.producto.codigo }}</span>
 		<span><b>Nombre: </b> {{ props.producto.nombre }}</span>
 		<span><b>Marca: </b> {{ props.producto.marca }}</span>

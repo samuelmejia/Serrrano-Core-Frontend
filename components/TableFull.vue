@@ -170,7 +170,7 @@ onMounted(() => {
 				</tbody>
 				<tfoot class="divide-y divide-gray-100"></tfoot>
 			</table>
-			<div style="width: 40%">
+			<div style="width: 60%">
 				<el-pagination
 					class="mt-2"
 					:key="stampActualizacionRegistros"

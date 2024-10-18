@@ -277,7 +277,7 @@ async function enviarProductoToPedido() {
 							<input type="text" class="text-center py-1 border-black" :value="row.encontrado" style="width: 100%" />
 						</td>
 						<td class="px-2">
-							<input type="text" class="text-center py-1 border" :value="storeEstadoSolicitar.get.find((x) => x.id)?.descripcion" style="width: 100%" />
+							<input type="text" class="text-center py-1 border" :value="storeEstadoSolicitar.get.find((x) => x.id == row.solicitar)?.descripcion" style="width: 100%" />
 						</td>
 					</tr>
 				</template>

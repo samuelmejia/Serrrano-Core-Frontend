@@ -47,6 +47,24 @@ export default class Fechas {
 		return Fechas.Date_To_String(date);
 	}
 
+	static horaBD_To_AMPM(hora24: string) {
+		let [get_hora, minutos, segundos] = hora24.split(":");
+
+		let periodo = "AM";
+		let hora = parseInt(get_hora);
+
+		if (hora >= 12) {
+			periodo = "PM";
+			if (hora > 12) {
+				hora -= 12;
+			}
+		} else if (hora === 0) {
+			hora = 12;
+		}
+
+		return `${hora < 10 ? "0" : ""}${hora}:${minutos}${periodo}`;
+	}
+
 	static monthsComplete = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
 	static mesesShort = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];

@@ -169,7 +169,7 @@ onMounted(() => {
 						<th>CODIGO</th>
 						<th>DESCRIPCION</th>
 						<th>MARCA</th>
-						<th>KARDEX</th>
+						<th>INF.P</th>
 						<th>CANTIDAD</th>
 						<th>OBSERVACIONES</th>
 						<th>GUARDAR</th>
@@ -182,11 +182,11 @@ onMounted(() => {
 						<td class="text-left">
 							<input type="text" class="p-1 border border-black" v-model="row.descripcion" @input="ingresoPedido(row, 'observaciones')" style="width: 100%" />
 						</td>
-						<td class="text-left">
+						<td class="text-center">
 							{{ row.marca }}
 						</td>
 						<td class="text-center">
-							<a tabindex="-1" :href="`/inventario/kardex?codProducto=${row.codProducto}`" target="_blank">
+							<a tabindex="-1" :href="`/inventario/info-producto?codProducto=${row.codProducto}`" target="_blank">
 								<el-button tabindex="-1" type="info" plain><i class="fas fa-external-link-alt"></i></el-button>
 							</a>
 						</td>

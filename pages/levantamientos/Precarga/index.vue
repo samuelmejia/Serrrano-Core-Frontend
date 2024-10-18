@@ -5,13 +5,12 @@ import CarritoSection from "./partials/CarritoSection.vue";
 import TableFull from "~/components/TableFull.vue";
 import Numeros from "~/helpers/Numeros";
 import Texto from "~/helpers/Texto";
-import LevantamientoController from "~/modules/Module.Compras.Levantamiento/Controllers/LevantamientoController";
+import PrecargaController from "~/modules/Module.Compras.Levantamiento/Controllers/PrecargaController";
 import type { TLevantamientoProductoModel, TProductoModel } from "~/modules/Module.Compras.Levantamiento/Types/TProductoModel";
 import SpinnerLoading from "~/components/SpinnerLoading.vue";
 
+import IniciarPrecargaModal from "~/components/Compras.Levantamiento/IniciarPrecargaModal.vue";
 import { useWindowSize } from "@vueuse/core";
-import InformacionService from "~/modules/Module.Compras.Levantamiento/Services/InformacionService";
-import type { TInfoProveedorDomain } from "~/modules/Module.Compras.Levantamiento/_Data/TipoInformacion";
 const { width, height } = useWindowSize();
 
 definePageMeta({
@@ -30,7 +29,7 @@ const stampActualizacionRegistros = ref(0);
 const stampActualizacionAgregados = ref(0);
 const stampActualizacionExistencias = ref(0);
 
-const controller = LevantamientoController.getInstance();
+const controller = PrecargaController.getInstance();
 
 async function cambiarEstadoAgregado(producto: TProductoModel) {
 	await controller.agregarProductoLevantamiento(producto);
@@ -105,13 +104,14 @@ async function confirmarInicioLevantamiento() {
 		mostrarFormularioIniciarPrecarga.value = true;
 	} catch (e: any) {}
 }
-
-onMounted(async () => {
-	await controller.servicioProductos.loadData();
-
+async function datosDePrecarga(paquete: { idProveedor: string; idMarca: string; modelo: string }) {
+	await controller.servicioProductos.loadPrecargados(paquete.idProveedor, paquete.idMarca, paquete.modelo);
 	stampActualizacionTabla.value++;
 	stampActualizacionRegistros.value++;
+	mostrarFormularioIniciarPrecarga.value = false;
+}
 
+onMounted(async () => {
 	controller.estatusLevantamiento().then(async (respuesta: boolean) => {
 		if (respuesta) {
 			levantamientoEnProceso.value = true;
@@ -126,36 +126,6 @@ const esperaCarga = ref(true);
 setTimeout(() => {
 	esperaCarga.value = false;
 }, 2500);
-
-mostrarFormularioIniciarPrecarga.value = true;
-
-const stampProveedores = ref(0);
-const stampMarcas = ref(0);
-
-const proveedor = ref("");
-let opcionesProveedor: { value: string; label: string }[] = [];
-
-const servicioInformacion = new InformacionService();
-
-onMounted(() => {
-	servicioInformacion.getProveedores().then((proveedores) => {
-		opcionesProveedor = proveedores.map((x) => {
-			return { value: x.idProveedor, label: x.nombreProveedor };
-		});
-
-		console.log("opcionesProveedor", opcionesProveedor);
-		stampProveedores.value++;
-	});
-});
-
-const mostrarModalProveedores = ref(false);
-
-const infoProveedor = ref<TInfoProveedorDomain | null>(null);
-function seleccionarProveedor(proveedor: TInfoProveedorDomain) {
-	console.log("seleccionarProveedor", proveedor);
-	infoProveedor.value = proveedor;
-	mostrarModalProveedores.value = false;
-}
 </script>
 
 <template>
@@ -163,11 +133,16 @@ function seleccionarProveedor(proveedor: TInfoProveedorDomain) {
 		<div v-if="!levantamientoEnProceso">
 			<el-button type="primary" :key="stampActualizacionAgregados" @click="confirmarInicioLevantamiento">Iniciar Levantamiento <i class="ml-2 fas fa-exclamation"></i></el-button>
 		</div>
-		<div v-if="levantamientoEnProceso" class="flex flex-col">
-			<el-button type="info" :key="stampActualizacionAgregados" @click="mostrarRevisadosModal = !mostrarRevisadosModal"
-				>Productos en Revisión: {{ controller.getCantidadProductosAgregadosLevantamiento() }}<i class="ml-2 fas fa-box-open"></i
-			></el-button>
-			<i style="font-size: 0.8rem">Click para ver el panel de revision</i>
+		<div v-if="levantamientoEnProceso" class="flex gap-x-2">
+			<div>
+				<el-button type="default" class="!bg-blue-200" @click="mostrarFormularioIniciarPrecarga = true"><i class="fas fa-edit"></i></el-button>
+			</div>
+			<div class="flex flex-col items-center">
+				<el-button type="info" :key="stampActualizacionAgregados" @click="mostrarRevisadosModal = !mostrarRevisadosModal"
+					>Productos en Revisión: {{ controller.getCantidadProductosAgregadosLevantamiento() }}<i class="ml-2 fas fa-box-open"></i
+				></el-button>
+				<i style="font-size: 0.8rem">Click para ver el panel de revision</i>
+			</div>
 		</div>
 	</div>
 
@@ -241,52 +216,7 @@ function seleccionarProveedor(proveedor: TInfoProveedorDomain) {
 	</el-dialog>
 
 	<el-dialog v-model="mostrarFormularioIniciarPrecarga" title="Iniciar Levantamiento con Precarga" :width="width <= 900 ? '70%' : '60%'">
-		<div style="border-top: 1px solid gray" class="mt-0 pt-4">
-			<div class="mb-6">
-				<label class="block text-gray-800 font-bold mb-2"> Proveedor </label>
-				<div class="grid gap-x-4" style="grid-template-columns: 0.5fr 1fr 2fr">
-					<div class="text-center">
-						<el-button @click="mostrarModalProveedores = true" type="info" plain><i class="fas fa-search"></i></el-button>
-					</div>
-					<input
-						:value="infoProveedor ? infoProveedor.rtn : ''"
-						readonly
-						class="shadow bg-gray-100 border rounded w-full py-2 px-3 text-gray-700 focus:outline-none focus:shadow-outline"
-						type="text"
-					/>
-					<input
-						:value="infoProveedor ? infoProveedor.nombreProveedor : ''"
-						readonly
-						class="shadow bg-gray-100 border rounded w-full py-2 px-3 text-gray-700 focus:outline-none focus:shadow-outline"
-						type="text"
-					/>
-				</div>
-			</div>
-			<div class="mb-6">
-				<label class="block text-gray-800 font-bold mb-2"> Marca </label>
-				<div class="grid gap-x-4" style="grid-template-columns: 0.5fr 1fr 2fr">
-					<div class="text-center">
-						<el-button type="info" plain><i class="fas fa-search"></i></el-button>
-					</div>
-					<input value="" readonly class="shadow bg-gray-100 border rounded w-full py-2 px-3 text-gray-700 focus:outline-none focus:shadow-outline" type="text" />
-					<span></span>
-				</div>
-			</div>
-			<div class="mb-6">
-				<label class="block text-gray-800 font-bold mb-2"> Modelo </label>
-				<div class="grid gap-x-4" style="grid-template-columns: 0.5fr 1fr 2fr">
-					<div class="text-center"></div>
-					<input value="" class="shadow border rounded w-full py-2 px-3 text-gray-700 focus:outline-none focus:shadow-outline" type="text" />
-				</div>
-			</div>
-			<div class="mb-6 flex justify-end">
-				<el-button type="success" @click="" size="large"> Iniciar </el-button>
-			</div>
-		</div>
-	</el-dialog>
-
-	<el-dialog v-model="mostrarModalProveedores" title="Buscar Proveedor" :width="width <= 900 ? '80%' : '65%'">
-		<BuscarProveedor @cancelar="mostrarModalProveedores = false" @proveedor-encontrado="seleccionarProveedor" />
+		<IniciarPrecargaModal @cancelar="mostrarFormularioIniciarPrecarga = false" @iniciar="datosDePrecarga" />
 	</el-dialog>
 
 	<SpinnerLoading :visible="loadingState.mostrar" :texto-mostrar="loadingState.texto" />

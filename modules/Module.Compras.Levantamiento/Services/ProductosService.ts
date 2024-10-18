@@ -1,7 +1,5 @@
-import Mensajes from "~/helpers/Mensajes";
 import ProductosLevantamientoAPI from "../API/ProductosAPI";
 import type { TProductoModel } from "../Types/TProductoModel";
-import type { TProductoDetalleExistenciasModel } from "../Types/TProductoDetalleExistenciasModel";
 
 export default class ProductosService {
 	api;
@@ -14,6 +12,13 @@ export default class ProductosService {
 
 	async loadData(): Promise<void> {
 		const productosIniciales = await this.api.GET_AllProductosGenerales();
+		productosIniciales.map((x) => {
+			this.data.set(x.codigo, x);
+		});
+	}
+
+	async loadPrecargados(idProveedor: string, idMarca: string, modelo: string): Promise<void> {
+		const productosIniciales = await this.api.GET_AllProductosPrecargados(idProveedor, idMarca, modelo);
 		productosIniciales.map((x) => {
 			this.data.set(x.codigo, x);
 		});

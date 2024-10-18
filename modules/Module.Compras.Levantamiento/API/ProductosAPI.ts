@@ -35,6 +35,41 @@ export default class ProductosAPI {
 		return [];
 	}
 
+	async GET_AllProductosPrecargados(idProveedor: string, idMarca: string, modelo: string): Promise<TProductoModel[]> {
+		const enviar = {
+			idProveedor,
+			idMarca,
+			modelo,
+		};
+
+		const api = new API();
+		const resData = await api.post<TProductoDomain[]>("/Informacion/Productos", enviar);
+
+		if (!!resData) {
+			return resData.map((x: TProductoDomain) => {
+				return <TProductoModel>{
+					codigo: x.id,
+					nombre: x.nombre,
+					modelo: x.marca,
+					linea: x.linea,
+					categoria: x.categoria,
+					marca: x.marca,
+					codigoBarras: !x.codigoBarra ? [] : x.codigoBarra.split(";"),
+					stockTotal: x.stockTotal,
+					impuesto: +x.impuesto,
+					estadoAgregado: false,
+					observaciones: "",
+					fechaUltimaCompra: x.fechaUltimaCompra,
+					fechaUltimaVenta: x.fechaUltimaVenta,
+					estado: x.estado,
+					detalleExistencias: [],
+				};
+			});
+		}
+
+		return [];
+	}
+
 	async GET_ProductosFiltrado(campo_filtro: string): Promise<TProductoModel[]> {
 		const api = new API();
 		const resData = await api.get<TProductoDomain[]>("/Producto/Producto", { busqueda: campo_filtro });
